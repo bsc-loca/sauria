@@ -42,7 +42,7 @@ Before starting a simulation, we generate a set of random convolutions and GEMMs
 ```bash
 source setup.sh
 cd Python
-source generate_stimuli.sh
+source generate_stimuli.sh bmk_small
 ```
 
 Then, we can move to the test directory to compile and run the emulated accelerator using verilator:

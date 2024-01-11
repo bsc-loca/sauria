@@ -262,7 +262,7 @@ module tb_sauria_subsystem ();
 	
     // If netlist we do not need parameters
     `ifdef NETLIST_TOP            
-        sauria_subsystem_syn #(  
+        sauria_subsystem_netlist #(  
 
     // If not netlist, instantiate the module with params
     `else

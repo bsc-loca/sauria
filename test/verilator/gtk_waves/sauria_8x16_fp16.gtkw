@@ -1,0 +1,234 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Fri Jan  5 09:01:17 2024
+[*]
+[dumpfile] "/users/jfornt/sauria/test/verilator/new_test.vcd"
+[dumpfile_mtime] "Fri Jan  5 08:46:56 2024"
+[dumpfile_size] 2405096450
+[savefile] "/users/jfornt/sauria/test/verilator/gtk_waves/sauria_8x16_fp16.gtkw"
+[timestart] 1
+[size] 1920 1017
+[pos] -9 -72
+*-18.006184 247840 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.sauria_tester.
+[treeopen] TOP.sauria_tester.dut.
+[treeopen] TOP.sauria_tester.dut.dma_top_i.dma_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.
+[sst_width] 494
+[signals_width] 399
+[sst_expanded] 1
+[sst_vpaned_height] 376
+@200
+-Clocking and Reset
+@28
+TOP.sauria_tester.dut.i_system_clk
+TOP.sauria_tester.dut.i_system_rstn
+TOP.sauria_tester.dut.i_sauria_clk
+TOP.sauria_tester.dut.i_sauria_rstn
+@200
+-
+-SAURIA Subsystem CFG Interface
+@22
+TOP.sauria_tester.dut.i_cfg_axi_awaddr[31:0]
+@28
+TOP.sauria_tester.dut.i_cfg_axi_awvalid
+TOP.sauria_tester.dut.o_cfg_axi_awready
+@22
+TOP.sauria_tester.dut.i_cfg_axi_wdata[31:0]
+TOP.sauria_tester.dut.i_cfg_axi_wstrb[3:0]
+@28
+TOP.sauria_tester.dut.i_cfg_axi_wvalid
+TOP.sauria_tester.dut.o_cfg_axi_wready
+TOP.sauria_tester.dut.o_cfg_axi_bresp[1:0]
+TOP.sauria_tester.dut.o_cfg_axi_bvalid
+TOP.sauria_tester.dut.i_cfg_axi_bready
+@22
+TOP.sauria_tester.dut.i_cfg_axi_araddr[31:0]
+@28
+TOP.sauria_tester.dut.i_cfg_axi_arvalid
+TOP.sauria_tester.dut.o_cfg_axi_arready
+@22
+TOP.sauria_tester.dut.o_cfg_axi_rdata[31:0]
+@28
+TOP.sauria_tester.dut.o_cfg_axi_rresp[1:0]
+TOP.sauria_tester.dut.o_cfg_axi_rvalid
+TOP.sauria_tester.dut.i_cfg_axi_rready
+@200
+-
+-SAURIA Subsystem DATA Port
+@22
+TOP.sauria_tester.dut.o_dat_axi_awaddr[31:0]
+TOP.sauria_tester.dut.o_dat_axi_awlen[7:0]
+@28
+TOP.sauria_tester.dut.o_dat_axi_awvalid
+TOP.sauria_tester.dut.i_dat_axi_awready
+@22
+TOP.sauria_tester.dut.o_dat_axi_wdata[127:0]
+TOP.sauria_tester.dut.o_dat_axi_wstrb[15:0]
+@28
+TOP.sauria_tester.dut.o_dat_axi_wlast
+TOP.sauria_tester.dut.o_dat_axi_wvalid
+TOP.sauria_tester.dut.i_dat_axi_wready
+TOP.sauria_tester.dut.i_dat_axi_bresp[1:0]
+TOP.sauria_tester.dut.i_dat_axi_bvalid
+TOP.sauria_tester.dut.o_dat_axi_bready
+@22
+TOP.sauria_tester.dut.o_dat_axi_araddr[31:0]
+TOP.sauria_tester.dut.o_dat_axi_arlen[7:0]
+@28
+TOP.sauria_tester.dut.o_dat_axi_arvalid
+TOP.sauria_tester.dut.i_dat_axi_arready
+@22
+TOP.sauria_tester.dut.i_dat_axi_rdata[127:0]
+TOP.sauria_tester.dut.i_dat_axi_rid[3:0]
+@28
+TOP.sauria_tester.dut.i_dat_axi_rlast
+TOP.sauria_tester.dut.i_dat_axi_rresp[1:0]
+TOP.sauria_tester.dut.i_dat_axi_rvalid
+TOP.sauria_tester.dut.o_dat_axi_rready
+@200
+-
+-SAURIA Controller Registers
+@28
+TOP.sauria_tester.dut.df_controller_i.start_q
+TOP.sauria_tester.dut.df_controller_i.ready_q
+TOP.sauria_tester.dut.df_controller_i.done_q
+TOP.sauria_tester.dut.df_controller_i.intr_q
+@200
+-
+@22
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[0][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[1][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[2][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[3][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[4][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[5][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[6][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[7][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[8][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[9][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[10][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[11][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[12][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[13][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[14][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[15][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[16][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[17][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[18][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[19][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[20][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[21][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[22][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[23][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[24][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[25][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[26][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[27][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[28][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[29][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[30][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[31][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[32][31:0]
+TOP.sauria_tester.dut.df_controller_i.ctrl_regs_q[33][31:0]
+@200
+-
+-DMA Registers
+@28
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.reader_start
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.writer_start
+@22
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.read_start_addr[31:0]
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.write_start_addr[31:0]
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.btt[31:0]
+@28
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.write_zero
+@200
+-
+@28
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.reader_intr
+TOP.sauria_tester.dut.dma_top_i.dma_i.conf_regs_I.writer_intr
+@200
+-
+-SAURIA Core Registers
+@28
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.soft_rst_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.start_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.auto_restart_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.done_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.mem_switch_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.mem_keep_A_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.mem_keep_B_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.mem_keep_C_q
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.sram_select_q[0:2]
+@200
+-
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.cycle_cnt_q[31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.stalls_cnt_q[31:0]
+@200
+-
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_con_q[0][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_con_q[1][31:0]
+@200
+-
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[0][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[1][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[2][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[3][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[4][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[5][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[6][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[7][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_act_q[8][31:0]
+@200
+-
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_wei_q[0][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_wei_q[1][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_wei_q[2][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_wei_q[3][31:0]
+@200
+-
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_out_q[0][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_out_q[1][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_out_q[2][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_out_q[3][31:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.config_regs_i.reg_out_q[4][31:0]
+@200
+-
+-SAURIA Core Array
+-PE[0,0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_clk
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_cscan_en
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_pipeline_en
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_a[15:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_b[15:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.a_zd_q[15:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.b_zd_q[15:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.mac_q[15:0]
+@201
+-
+@28
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_cswitch
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.cswitch_q_ext
+@22
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.i_c[15:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.mac_sc_q[15:0]
+TOP.sauria_tester.dut.sauria_core_i.sauria_logic_top_i.sa_array_i.y_axis[0].x_axis[0].sa_processing_element_i.o_c[15:0]
+@200
+-
+[pattern_trace] 1
+[pattern_trace] 0

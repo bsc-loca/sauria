@@ -1,0 +1,18 @@
+[submodule "RTL/src/dma/udma"]
+	path = RTL/src/dma/udma
+	url = git@gitlab-internal.bsc.es:drac/udma.git
+[submodule "pulp_platform/axi"]
+	path = pulp_platform/axi
+	url = https://github.com/pulp-platform/axi.git
+[submodule "pulp_platform/common_cells"]
+	path = pulp_platform/common_cells
+	url = https://github.com/pulp-platform/common_cells.git
+[submodule "pulp_platform/common_verification"]
+	path = pulp_platform/common_verification
+	url = https://github.com/pulp-platform/common_verification.git
+[submodule "pulp_platform/fpnew"]
+	path = pulp_platform/fpnew
+	url = https://github.com/openhwgroup/cvfpu.git
+[submodule "tools/verilator"]
+	path = tools/verilator
+	url = https://github.com/verilator/verilator.git

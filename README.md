@@ -10,7 +10,7 @@ Maintainer: Jordi Fornt Mas (jordi.fornt@bsc.es)
 
 ## Documentation
 
-Check out the project's Wiki (https://gitlab.bsc.es/jfornt/sauria/-/wikis/home) for some in-depth explanations on how the accelerator is built.
+Check out the project's Wiki (https://gitlab.bsc.es/hwdesign/ips/accelerators/sauria/-/wikis/home) for some in-depth explanations on how the accelerator is built.
 
 ## Requirements
 

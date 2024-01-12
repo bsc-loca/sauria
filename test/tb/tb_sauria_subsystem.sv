@@ -30,12 +30,14 @@
 
 `timescale 1ps/1ps
 
+`define STIMULI_PATH "../stimuli"
+
 //`define POWER
 //`define NETLIST_TOP
 //`define APPROXIMATE
 
 //`define BMK_SMALL
-`define BMK_TORTURE
+//`define BMK_TORTURE
 
 module tb_sauria_subsystem ();
 
@@ -260,7 +262,7 @@ module tb_sauria_subsystem ();
 	
     // If netlist we do not need parameters
     `ifdef NETLIST_TOP            
-        sauria_subsystem_syn #(  
+        sauria_subsystem_netlist #(  
 
     // If not netlist, instantiate the module with params
     `else
@@ -399,34 +401,34 @@ module tb_sauria_subsystem ();
 
         `ifdef BMK_SMALL
             `ifdef APPROXIMATE
-                $readmemh("../stimuli/bmk_small/tstcfg_approx.txt", cfg_Matrix);
-                $readmemh("../stimuli/bmk_small/GoldenStimuli_approx.txt", Input_Matrix);
-                $readmemh("../stimuli/bmk_small/GoldenOutputs_approx.txt", Output_Matrix);
+                $readmemh({`STIMULI_PATH,"/bmk_small/tstcfg_approx.txt"}, cfg_Matrix);
+                $readmemh({`STIMULI_PATH,"/bmk_small/GoldenStimuli_approx.txt"}, Input_Matrix);
+                $readmemh({`STIMULI_PATH,"/bmk_small/GoldenOutputs_approx.txt"}, Output_Matrix);
             `else
-                $readmemh("../stimuli/bmk_small/tstcfg.txt", cfg_Matrix);
-                $readmemh("../stimuli/bmk_small/GoldenStimuli.txt", Input_Matrix);
-                $readmemh("../stimuli/bmk_small/GoldenOutputs.txt", Output_Matrix);
+                $readmemh({`STIMULI_PATH,"/bmk_small/tstcfg.txt"}, cfg_Matrix);
+                $readmemh({`STIMULI_PATH,"/bmk_small/GoldenStimuli.txt"}, Input_Matrix);
+                $readmemh({`STIMULI_PATH,"/bmk_small/GoldenOutputs.txt"}, Output_Matrix);
             `endif
         `else
             `ifdef BMK_TORTURE
                 `ifdef APPROXIMATE
-                    $readmemh("../stimuli/bmk_torture/tstcfg_approx.txt", cfg_Matrix);
-                    $readmemh("../stimuli/bmk_torture/GoldenStimuli_approx.txt", Input_Matrix);
-                    $readmemh("../stimuli/bmk_torture/GoldenOutputs_approx.txt", Output_Matrix);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/tstcfg_approx.txt"}, cfg_Matrix);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/GoldenStimuli_approx.txt"}, Input_Matrix);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/GoldenOutputs_approx.txt"}, Output_Matrix);
                 `else
-                    $readmemh("../stimuli/bmk_torture/tstcfg.txt", cfg_Matrix);
-                    $readmemh("../stimuli/bmk_torture/GoldenStimuli.txt", Input_Matrix);
-                    $readmemh("../stimuli/bmk_torture/GoldenOutputs.txt", Output_Matrix);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/tstcfg.txt"}, cfg_Matrix);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/GoldenStimuli.txt"}, Input_Matrix);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/GoldenOutputs.txt"}, Output_Matrix);
                 `endif
             `else
                 `ifdef APPROXIMATE
-                    $readmemh("../stimuli/conv_validation/tstcfg_approx.txt", cfg_Matrix);
-                    $readmemh("../stimuli/conv_validation/GoldenStimuli_approx.txt", Input_Matrix);
-                    $readmemh("../stimuli/conv_validation/GoldenOutputs_approx.txt", Output_Matrix);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/tstcfg_approx.txt"}, cfg_Matrix);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/GoldenStimuli_approx.txt"}, Input_Matrix);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/GoldenOutputs_approx.txt"}, Output_Matrix);
                 `else
-                    $readmemh("../stimuli/conv_validation/tstcfg.txt", cfg_Matrix);
-                    $readmemh("../stimuli/conv_validation/GoldenStimuli.txt", Input_Matrix);
-                    $readmemh("../stimuli/conv_validation/GoldenOutputs.txt", Output_Matrix);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/tstcfg.txt"}, cfg_Matrix);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/GoldenStimuli.txt"}, Input_Matrix);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/GoldenOutputs.txt"}, Output_Matrix);
                 `endif
             `endif
         `endif
@@ -464,28 +466,28 @@ module tb_sauria_subsystem ();
         // LOAD DATA INTO ACTUAL AND GOLD DRAM
         `ifdef BMK_SMALL
             `ifdef APPROXIMATE
-                $readmemh("../stimuli/bmk_small/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                $readmemh("../stimuli/bmk_small/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
+                $readmemh({`STIMULI_PATH,"/bmk_small/initial_dram_approx.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+                $readmemh({`STIMULI_PATH,"/bmk_small/gold_dram_approx.txt"}, gold_dram, DRAM_OFFSET);
             `else
-                $readmemh("../stimuli/bmk_small/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                $readmemh("../stimuli/bmk_small/gold_dram.txt", gold_dram, DRAM_OFFSET);
+                $readmemh({`STIMULI_PATH,"/bmk_small/initial_dram.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+                $readmemh({`STIMULI_PATH,"/bmk_small/gold_dram.txt"}, gold_dram, DRAM_OFFSET);
             `endif
         `else
             `ifdef BMK_TORTURE
                 `ifdef APPROXIMATE
-                    $readmemh("../stimuli/bmk_torture/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/bmk_torture/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/initial_dram_approx.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/gold_dram_approx.txt"}, gold_dram, DRAM_OFFSET);
                 `else
-                    $readmemh("../stimuli/bmk_torture/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/bmk_torture/gold_dram.txt", gold_dram, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/initial_dram.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/bmk_torture/gold_dram.txt"}, gold_dram, DRAM_OFFSET);
                 `endif
             `else
                 `ifdef APPROXIMATE
-                    $readmemh("../stimuli/conv_validation/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/conv_validation/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/initial_dram_approx.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/gold_dram_approx.txt"}, gold_dram, DRAM_OFFSET);
                 `else
-                    $readmemh("../stimuli/conv_validation/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/conv_validation/gold_dram.txt", gold_dram, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/initial_dram.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh({`STIMULI_PATH,"/conv_validation/gold_dram.txt"}, gold_dram, DRAM_OFFSET);
                 `endif
             `endif
         `endif

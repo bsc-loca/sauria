@@ -182,7 +182,7 @@ end
 // Module instantiation
 // ------------------------------------------------------------
 
-udma_top #(
+redma_top #(
     .AXI_LITE_ADDR_WIDTH(32),
     .AXI_ADDR_WIDTH(DATA_AXI_ADDR_WIDTH),
     .AXI_DATA_WIDTH(DATA_AXI_DATA_WIDTH),

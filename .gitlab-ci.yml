@@ -1,0 +1,62 @@
+stages:
+  - compile
+  - stim_gen
+  - test
+
+variables:
+  GIT_SOURCES_ATTEMPTS: 4
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOWNSTREAM: "false"
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "ci"
+
+.global_before_script: &global_before_script
+  ## set enviroment
+  - git config --global user.name "${GITLAB_USER_NAME}"
+  - git config --global user.email "${GITLAB_USER_EMAIL}"
+  
+  ## Print Variables
+  - echo $UPSTREAM_BRANCH
+  - echo $DOWNSTREAM
+  - echo $PROJECT_PATH
+  - echo $PROJECT_NAME
+  - echo $PROJECT_NAMESPACE
+  - PR_NAMESPACE=$(echo $PROJECT_NAMESPACE | sed 's_'"epac/"'__')
+  - echo $PR_NAMESPACE
+  - echo $SUBMODULE_COMMIT_SHORT
+  - echo $SUBMODULE_COMMIT_SHA
+  - echo $SUBMODULE_COMMIT_BEFORE_SHA
+  - echo $CI_COMMIT_BRANCH
+  - echo $CI_PIPELINE_SOURCE
+  - git submodule status
+  - ls /opt/verilator
+  
+  ## Pull the submodule in case of downstream (triggered pipelines)
+  # We need to update the submodule that triggered the pipeline
+  # This should only be done for jobs which require the submodules
+  - |
+    if [ "$DOWNSTREAM" == "true" ] && [ "$GIT_SUBMODULE_STRATEGY" == "recursive" ]; then
+        cd modules/${PR_NAMESPACE}
+        git fetch origin +refs/heads/*:refs/remotes/origin/*
+        git checkout ${SUBMODULE_COMMIT_SHA}
+        cd ../..
+    fi
+
+.simulation:
+  image: registry.gitlab.bsc.es/hwdesign/containerhub/verilator:latest
+  before_script:
+    - *global_before_script
+    - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+
+default:
+  before_script:
+    - *global_before_script
+
+include:
+  - local: test/ci/verification.yml

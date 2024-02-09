@@ -21,17 +21,15 @@ Check out the project's Wiki (https://gitlab.bsc.es/hwdesign/ips/accelerators/sa
 
 ## Installation
 
-After cloning the repository and selecting the branch, run the following command to update all the submodules needed:
+After cloning the repository and selecting the branch, run the following command to update all the submodules:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-## Running Simulations
-
 SAURIA can be emulated using Verilator v4.224. We have observed issues with older and newer versions, so we recommend using a local installation as described below. A testbench for simulation with commercial RTL simulators (e.g. Synopsys VCS or Questa) is also provided.
 
-The first step is to install Verilator, which can be done as follows:
+To install Verilator v4.224 locally, run:
 
 ```bash
 source setup.sh
@@ -39,7 +37,21 @@ cd tools/
 source install_verilator.sh
 ```
 
-Before starting a simulation, we generate a set of random convolutions and GEMMs using Python:
+To use the Python script that generates random stimuli for the simulations, install the required packages into your Python environment by using pip:
+
+```bash
+pip install -r Python/requirements_pip.txt
+```
+
+Or, alternatively, using Conda:
+
+```bash
+conda install --file Python/requirements_pip.txt
+```
+
+## Running Simulations
+
+First, we generate a set of random convolutions and GEMMs using Python:
 
 ```bash
 source setup.sh

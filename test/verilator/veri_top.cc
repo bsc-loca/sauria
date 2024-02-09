@@ -512,6 +512,7 @@ int main(int argc, char** argv, char** env) {
 
     if (total_errors>0) {
         std::cout << std::endl << "[" << main_time << "] Benchmark failed with " << total_errors << " errors." << std::endl << "FAILED!" << std::endl;
+        exit_code = 1;
     } else {
         std::cout << std::endl << "[" << main_time << "] Benchmark passed with no errors." << std::endl << "SUCCESS!" << std::endl;
     }
@@ -520,7 +521,7 @@ int main(int argc, char** argv, char** env) {
     if(vcd_enable) vcd->close();
 
     if (max_time != 0 && main_time >= max_time) {
-        exit_code = -1;
+        exit_code = 1;
         std::cerr << "[" << main_time << "] TIMEOUT - Arrived at max time." << std::endl;
     }
 

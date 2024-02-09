@@ -15,4 +15,4 @@
 	url = https://github.com/verilator/verilator.git
 [submodule "RTL/src/dma/redma"]
 	path = RTL/src/dma/redma
-	url = ../../peripherals/memory-management/redma.git
+	url = https://github.com/bsc-loca/redma

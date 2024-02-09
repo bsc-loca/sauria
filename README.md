@@ -8,6 +8,8 @@ Maintainer: Jordi Fornt Mas (jordi.fornt@bsc.es)
 
 ![diagram](diagram.svg?raw=true){width=60%}
 
+<img src="diagram.svg" width="300">
+
 ## Documentation
 
 Check out the project's Wiki (https://gitlab.bsc.es/hwdesign/ips/accelerators/sauria/-/wikis/home) for some in-depth explanations on how the accelerator is built.
@@ -74,6 +76,10 @@ If you use SAURIA in your work, you can cite the following paper:
   pages={1874-1878},
   doi={10.1109/TVLSI.2023.3286122}}
 ```
+
+## Contributing
+
+If you would like to contribute to SAURIA, please contact jordi.fornt@bsc.es.
 
 ## Licensing
 

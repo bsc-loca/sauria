@@ -6,7 +6,7 @@ The accelerator can natively compute convolution and general matrix-matrix multi
 
 Maintainer: Jordi Fornt Mas (jordi.fornt@bsc.es)
 
-<img src="diagram.svg" width="750">
+![Alt text](./diagram.svg)
 
 ## Documentation
 

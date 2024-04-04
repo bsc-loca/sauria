@@ -292,16 +292,16 @@ always_comb begin : demux_sel
     lite_demx_ar_sel = 2'd0;
 
     // AW - Controller region
-    if      ((io_mem_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
+    if      ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
         lite_demx_aw_sel = 2'd0;
     // AW - DMA region
-    else if ((io_mem_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
+    else if ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
         lite_demx_aw_sel = 2'd1;
     // AW - SAURIA region
-    else if ((io_mem_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
+    else if ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
         
         // SAURIA Core Config
-        if ((io_mem_port.aw_addr & sauria_addr_pkg::MEM_ADDR_MASK) == 0)
+        if ((io_cfg_port.aw_addr & sauria_addr_pkg::MEM_ADDR_MASK) == 0)
             lite_demx_aw_sel = 2'd2;
         // SAURIA Memory Debug access
         else
@@ -309,16 +309,16 @@ always_comb begin : demux_sel
     end
 
     // AR - Controller region
-    if      ((io_mem_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
+    if      ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
         lite_demx_ar_sel = 2'd0;
     // AR - DMA region
-    else if ((io_mem_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
+    else if ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
         lite_demx_ar_sel = 2'd1;
     // AR - SAURIA region
-    else if ((io_mem_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
+    else if ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
         
         // SAURIA Core Config
-        if ((io_mem_port.ar_addr & sauria_addr_pkg::MEM_ADDR_MASK) == 0)
+        if ((io_cfg_port.ar_addr & sauria_addr_pkg::MEM_ADDR_MASK) == 0)
             lite_demx_ar_sel = 2'd2;
         // SAURIA Memory Debug access
         else

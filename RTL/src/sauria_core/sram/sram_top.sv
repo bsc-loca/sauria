@@ -107,7 +107,7 @@ logic [SRAMC_W-1:0]     sramc_output_q, sramc_output_d;
 // Host SRAM selection - Based on upper SRAM bits
 // ------------------------------------------------------------
 
-assign host_sram_select_d = i_address & sauria_addr_pkg::MEM_ADDR_MASK;
+assign host_sram_select_d = i_address & sauria_addr_pkg::SAURIA_MEM_ADDR_MASK;
 
 always_comb begin : host_rd_wr_enables
     
@@ -117,7 +117,7 @@ always_comb begin : host_rd_wr_enables
     host_sramb_rden = 0;
     host_sramc_wren = 0;    
     host_sramc_rden = 0;
-    host_sram_output = 0;
+    host_sram_output = 32'h4BADADD2;
 
     // Inputs selected by input address
     // +++++++++++++++++++++++++++++++++

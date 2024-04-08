@@ -17,6 +17,11 @@ else
       echo ""
 fi
 
+if [ "$TEST_TYPE" = "debug_test" ]
+then
+    MAX_CYCLES=100000
+fi
+
 if [ -z "$USE_VCD" ]
 then
     VCD_OPTS=""

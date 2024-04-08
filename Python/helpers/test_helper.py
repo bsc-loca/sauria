@@ -39,6 +39,7 @@ TOPTS = {
     #       * bmk_small :           4 medium-sized convolutions with tiling
     #       * bmk_torture :         40 large convolutions with tiling
     #       * power_estimation :    1 small convolution with high PE utilization for power estimation
+    #       * debug_test :          testing different memory accesses
     "test_type" :           "conv_validation",
 
     # Additional options used for debugging
@@ -693,6 +694,10 @@ def generate_tests():
         sram_sizes = [HOPTS['MEMA_size'], HOPTS['MEMB_size'], HOPTS['MEMC_size']]
         gen_random_tests(LIMITS, sram_sizes, TESTS, HOPTS['X'], HOPTS['Y'], HOPTS['DILP_W'], HOPTS['PARAMS_W'], 70)
     
+    # Debug test (uses alternative flow, parameters ignored)
+    elif (TOPTS['test_type']=='debug_test'):
+        TESTS = [[1]]
+
     # Unrecognized test type (error)
     else:
         assert 0, 'Could not recognize test_type = "{}"'.format(TOPTS['test_type'])
@@ -997,7 +1002,7 @@ def generate_controller_cmds(controller_regs, N_VECTORS):
     idx=0
 
     # Enable interrupts initially
-    cfg_address[idx] =    0x8
+    cfg_address[idx] =    HOPTS['CTRL_offset']+0x8
     cfg_data_in[idx] =    3
     cfg_wren[idx] =       1
     idx+=1
@@ -1011,7 +1016,7 @@ def generate_controller_cmds(controller_regs, N_VECTORS):
             idx+=1
 
         # Start control FSM
-        cfg_address[idx] =    0x0
+        cfg_address[idx] =    HOPTS['CTRL_offset']+0x0
         cfg_data_in[idx] =    3
         cfg_wren[idx] =       1
         idx+=1
@@ -1021,7 +1026,7 @@ def generate_controller_cmds(controller_regs, N_VECTORS):
         idx+=1
 
         # Lower interrupts
-        cfg_address[idx] =    0xC
+        cfg_address[idx] =    HOPTS['CTRL_offset']+0xC
         cfg_data_in[idx] =    3
         cfg_wren[idx] =       1
         idx+=1

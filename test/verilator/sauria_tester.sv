@@ -257,8 +257,18 @@ module sauria_tester(
     // Load memories
     initial begin: data_load_check
         case(file_opts)
-            // 0 = bmk_small
+            // 0 = conv_validation
             0: begin
+                `ifdef APPROXIMATE
+                    $readmemh("../stimuli/conv_validation/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh("../stimuli/conv_validation/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
+                `else
+                    $readmemh("../stimuli/conv_validation/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh("../stimuli/conv_validation/gold_dram.txt", gold_dram, DRAM_OFFSET);
+                `endif
+            end
+            // 1 = bmk_small
+            1: begin
                 `ifdef APPROXIMATE
                     $readmemh("../stimuli/bmk_small/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
                     $readmemh("../stimuli/bmk_small/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
@@ -267,8 +277,8 @@ module sauria_tester(
                     $readmemh("../stimuli/bmk_small/gold_dram.txt", gold_dram, DRAM_OFFSET);
                 `endif
             end
-            // 1 = bmk_torture
-            1: begin
+            // 2 = bmk_torture
+            2: begin
                 `ifdef APPROXIMATE
                     $readmemh("../stimuli/bmk_torture/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
                     $readmemh("../stimuli/bmk_torture/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
@@ -277,14 +287,14 @@ module sauria_tester(
                     $readmemh("../stimuli/bmk_torture/gold_dram.txt", gold_dram, DRAM_OFFSET);
                 `endif
             end
-            // 2 = conv_validation
-            2: begin
+            // 3 = debug_test
+            3: begin
                 `ifdef APPROXIMATE
-                    $readmemh("../stimuli/conv_validation/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/conv_validation/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
+                    $readmemh("../stimuli/debug_test/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh("../stimuli/debug_test/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
                 `else
-                    $readmemh("../stimuli/conv_validation/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/conv_validation/gold_dram.txt", gold_dram, DRAM_OFFSET);
+                    $readmemh("../stimuli/debug_test/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
+                    $readmemh("../stimuli/debug_test/gold_dram.txt", gold_dram, DRAM_OFFSET);
                 `endif
             end
         endcase

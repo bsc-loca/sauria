@@ -121,7 +121,7 @@ always @(posedge clk_i) begin: ram
 
                 // Byte mask (converted from bitwise mask)
                 if (ram_wmask[8*b]) begin
-                    mem[ram_addr+b] = ram_din[8*b +: 8];
+                    mem[ram_addr+b] <= ram_din[8*b +: 8];
                 end
             end
 

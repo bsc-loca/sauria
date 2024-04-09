@@ -1,0 +1,303 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Mon Apr  8 13:42:00 2024
+[*]
+[dumpfile] "/users/jfornt/new_sauria/sauria/test/verilator/new_test.vcd"
+[dumpfile_mtime] "Mon Apr  8 13:00:05 2024"
+[dumpfile_size] 6625370
+[savefile] "/users/jfornt/new_sauria/sauria/test/verilator/gtk_waves/axi_cfg_intf.gtkw"
+[timestart] 4932
+[size] 1920 1017
+[pos] -9 -72
+*-6.231071 5150 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.sauria_tester.
+[treeopen] TOP.sauria_tester.dut.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sram_top_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.
+[treeopen] TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.
+[sst_width] 369
+[signals_width] 366
+[sst_expanded] 1
+[sst_vpaned_height] 304
+@200
+-
+-IO CFG Port
+@22
+TOP.sauria_tester.dut.io_cfg_port.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.io_cfg_port.aw_ready
+TOP.sauria_tester.dut.io_cfg_port.aw_valid
+@22
+TOP.sauria_tester.dut.io_cfg_port.w_data[31:0]
+@28
+TOP.sauria_tester.dut.io_cfg_port.w_ready
+TOP.sauria_tester.dut.io_cfg_port.w_valid
+TOP.sauria_tester.dut.io_cfg_port.b_resp[1:0]
+TOP.sauria_tester.dut.io_cfg_port.b_ready
+TOP.sauria_tester.dut.io_cfg_port.b_valid
+@22
+TOP.sauria_tester.dut.io_cfg_port.ar_addr[31:0]
+@28
+TOP.sauria_tester.dut.io_cfg_port.ar_ready
+TOP.sauria_tester.dut.io_cfg_port.ar_valid
+@22
+TOP.sauria_tester.dut.io_cfg_port.r_data[31:0]
+@28
+TOP.sauria_tester.dut.io_cfg_port.r_resp[1:0]
+TOP.sauria_tester.dut.io_cfg_port.r_ready
+TOP.sauria_tester.dut.io_cfg_port.r_valid
+@200
+-
+-Controller CFG Port
+@22
+TOP.sauria_tester.dut.cfg_controller.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.cfg_controller.aw_ready
+TOP.sauria_tester.dut.cfg_controller.aw_valid
+@22
+TOP.sauria_tester.dut.cfg_controller.w_data[31:0]
+@28
+TOP.sauria_tester.dut.cfg_controller.w_ready
+TOP.sauria_tester.dut.cfg_controller.w_valid
+@22
+TOP.sauria_tester.dut.cfg_controller.ar_addr[31:0]
+@28
+TOP.sauria_tester.dut.cfg_controller.ar_ready
+TOP.sauria_tester.dut.cfg_controller.ar_valid
+@22
+TOP.sauria_tester.dut.cfg_controller.r_data[31:0]
+@28
+TOP.sauria_tester.dut.cfg_controller.r_resp[1:0]
+TOP.sauria_tester.dut.cfg_controller.r_ready
+TOP.sauria_tester.dut.cfg_controller.r_valid
+@200
+-
+@201
+-
+@200
+-ReDMA CFG Port
+@22
+TOP.sauria_tester.dut.udma_cfg_port.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.udma_cfg_port.aw_ready
+TOP.sauria_tester.dut.udma_cfg_port.aw_valid
+@22
+TOP.sauria_tester.dut.udma_cfg_port.w_data[31:0]
+@28
+TOP.sauria_tester.dut.udma_cfg_port.w_ready
+TOP.sauria_tester.dut.udma_cfg_port.w_valid
+@22
+TOP.sauria_tester.dut.udma_cfg_port.ar_addr[31:0]
+@28
+TOP.sauria_tester.dut.udma_cfg_port.ar_ready
+TOP.sauria_tester.dut.udma_cfg_port.ar_valid
+@22
+TOP.sauria_tester.dut.udma_cfg_port.r_data[31:0]
+@28
+TOP.sauria_tester.dut.udma_cfg_port.r_resp[1:0]
+TOP.sauria_tester.dut.udma_cfg_port.r_ready
+TOP.sauria_tester.dut.udma_cfg_port.r_valid
+@200
+-
+-SAURIA Core CFG Port
+@22
+TOP.sauria_tester.dut.sauria_cfg_port_LF.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.sauria_cfg_port_LF.aw_ready
+TOP.sauria_tester.dut.sauria_cfg_port_LF.aw_valid
+@22
+TOP.sauria_tester.dut.sauria_cfg_port_LF.w_data[31:0]
+@28
+TOP.sauria_tester.dut.sauria_cfg_port_LF.w_ready
+TOP.sauria_tester.dut.sauria_cfg_port_LF.w_valid
+@22
+TOP.sauria_tester.dut.sauria_cfg_port_LF.ar_addr[31:0]
+@28
+TOP.sauria_tester.dut.sauria_cfg_port_LF.ar_ready
+TOP.sauria_tester.dut.sauria_cfg_port_LF.ar_valid
+@22
+TOP.sauria_tester.dut.sauria_cfg_port_LF.r_data[31:0]
+@28
+TOP.sauria_tester.dut.sauria_cfg_port_LF.r_resp[1:0]
+TOP.sauria_tester.dut.sauria_cfg_port_LF.r_ready
+TOP.sauria_tester.dut.sauria_cfg_port_LF.r_valid
+@200
+-
+-cfg_mem_debug
+@22
+TOP.sauria_tester.dut.cfg_mem_debug.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.cfg_mem_debug.aw_ready
+TOP.sauria_tester.dut.cfg_mem_debug.aw_valid
+TOP.sauria_tester.dut.cfg_mem_debug.b_resp[1:0]
+TOP.sauria_tester.dut.cfg_mem_debug.b_ready
+TOP.sauria_tester.dut.cfg_mem_debug.b_valid
+@22
+TOP.sauria_tester.dut.cfg_mem_debug.ar_addr[31:0]
+@28
+TOP.sauria_tester.dut.cfg_mem_debug.ar_ready
+TOP.sauria_tester.dut.cfg_mem_debug.ar_valid
+@22
+TOP.sauria_tester.dut.cfg_mem_debug.r_data[31:0]
+@28
+TOP.sauria_tester.dut.cfg_mem_debug.r_ready
+TOP.sauria_tester.dut.cfg_mem_debug.r_valid
+@200
+-debug_mem_sauria_interm
+@22
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.aw_ready
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.aw_valid
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.b_resp[1:0]
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.b_ready
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.b_valid
+@22
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.ar_addr[31:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.ar_ready
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.ar_valid
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.r_ready
+TOP.sauria_tester.dut.debug_mem_sauria_intermediate.r_valid
+@200
+-debug_mem_sauria
+@22
+TOP.sauria_tester.dut.debug_mem_sauria.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria.aw_ready
+TOP.sauria_tester.dut.debug_mem_sauria.aw_valid
+@22
+TOP.sauria_tester.dut.debug_mem_sauria.aw_id[3:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria.b_resp[1:0]
+@22
+TOP.sauria_tester.dut.debug_mem_sauria.b_id[3:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria.b_ready
+TOP.sauria_tester.dut.debug_mem_sauria.b_valid
+@22
+TOP.sauria_tester.dut.debug_mem_sauria.ar_addr[31:0]
+TOP.sauria_tester.dut.debug_mem_sauria.ar_len[7:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria.ar_ready
+TOP.sauria_tester.dut.debug_mem_sauria.ar_valid
+@22
+TOP.sauria_tester.dut.debug_mem_sauria.r_data[127:0]
+@28
+TOP.sauria_tester.dut.debug_mem_sauria.r_last
+TOP.sauria_tester.dut.debug_mem_sauria.r_ready
+TOP.sauria_tester.dut.debug_mem_sauria.r_valid
+@200
+-sauria_mem_port_hf
+@22
+TOP.sauria_tester.dut.sauria_mem_port_HF.aw_addr[31:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_HF.aw_ready
+TOP.sauria_tester.dut.sauria_mem_port_HF.aw_valid
+@22
+TOP.sauria_tester.dut.sauria_mem_port_HF.aw_id[4:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_HF.b_resp[1:0]
+@22
+TOP.sauria_tester.dut.sauria_mem_port_HF.b_id[4:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_HF.b_ready
+TOP.sauria_tester.dut.sauria_mem_port_HF.b_valid
+@22
+TOP.sauria_tester.dut.sauria_mem_port_HF.ar_addr[31:0]
+TOP.sauria_tester.dut.sauria_mem_port_HF.ar_len[7:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_HF.ar_ready
+TOP.sauria_tester.dut.sauria_mem_port_HF.ar_valid
+@22
+TOP.sauria_tester.dut.sauria_mem_port_HF.r_data[127:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_HF.r_last
+TOP.sauria_tester.dut.sauria_mem_port_HF.r_ready
+TOP.sauria_tester.dut.sauria_mem_port_HF.r_valid
+@200
+-
+-SAURIA Core Mem Port
+@22
+TOP.sauria_tester.dut.sauria_mem_port_LF.aw_addr[31:0]
+TOP.sauria_tester.dut.sauria_mem_port_LF.aw_len[7:0]
+TOP.sauria_tester.dut.sauria_mem_port_LF.aw_id[4:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_LF.aw_ready
+TOP.sauria_tester.dut.sauria_mem_port_LF.aw_valid
+@22
+TOP.sauria_tester.dut.sauria_mem_port_LF.w_data[127:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_LF.w_last
+TOP.sauria_tester.dut.sauria_mem_port_LF.w_ready
+TOP.sauria_tester.dut.sauria_mem_port_LF.w_valid
+@22
+TOP.sauria_tester.dut.sauria_mem_port_LF.ar_addr[31:0]
+TOP.sauria_tester.dut.sauria_mem_port_LF.ar_len[7:0]
+TOP.sauria_tester.dut.sauria_mem_port_LF.ar_id[4:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_LF.ar_ready
+TOP.sauria_tester.dut.sauria_mem_port_LF.ar_valid
+@22
+TOP.sauria_tester.dut.sauria_mem_port_LF.r_data[127:0]
+TOP.sauria_tester.dut.sauria_mem_port_LF.r_id[4:0]
+@28
+TOP.sauria_tester.dut.sauria_mem_port_LF.r_last
+TOP.sauria_tester.dut.sauria_mem_port_LF.r_ready
+TOP.sauria_tester.dut.sauria_mem_port_LF.r_valid
+@200
+-
+-SAURIA Mem Interface
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.i_data[127:0]
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.i_address[31:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.i_wren
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.i_rden
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.o_data_out[127:0]
+@200
+-
+-SAURIA Raw memories
+-SRAMA
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.sram_0_i.i_addr[10:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.sram_0_i.i_cen
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.sram_0_i.i_rdwen
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.sram_1_i.i_addr[10:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.sram_1_i.i_cen
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMA_i.sram_1_i.i_rdwen
+@200
+-SRAMB
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.sram_0_i.i_addr[9:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.sram_0_i.i_cen
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.sram_0_i.i_rdwen
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.sram_1_i.i_addr[9:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.sram_1_i.i_cen
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMB_i.sram_1_i.i_rdwen
+@200
+-SRAMC
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.sram_0_i.i_addr[10:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.sram_0_i.i_cen
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.sram_0_i.i_rdwen
+@22
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.sram_1_i.i_addr[10:0]
+@28
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.sram_1_i.i_cen
+TOP.sauria_tester.dut.sauria_core_i.sram_top_i.SRAMC_i.sram_1_i.i_rdwen
+@200
+-
+[pattern_trace] 1
+[pattern_trace] 0

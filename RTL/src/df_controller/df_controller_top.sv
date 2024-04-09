@@ -202,8 +202,10 @@ module df_controller_top #(
     // Register Read logic
     always_comb begin : reg_read
 
+        // Data defaults to "bad address 1"
+        cfg_rdata_d =       32'h1BADADD2;
+
         // Response defaults to zero
-        cfg_rdata_d =       '0;
         cfg_arready_d =     1'b0;
         cfg_rvalid_d =      1'b0;
         cfg_rresp_d =       1'b0;
@@ -215,22 +217,25 @@ module df_controller_top #(
             cfg_rvalid_d =      1'b1;
 
             // CONTROL SIGNALS      - Addr = 0x0
-            if (config_axilite.awaddr[7:2] == 0) begin
+            if (config_axilite.araddr[7:2] == 0) begin
 
                 cfg_rdata_d[0] = start_q;
                 cfg_rdata_d[1] = done_q;
-                cfg_rdata_d[3] = ready_q;
+                cfg_rdata_d[23:2]  = '0;
+                cfg_rdata_d[31:24] = 8'hC0;
 
             end else
             // INTERRUPT ENABLE     - Addr = 0x8
-            if (config_axilite.awaddr[7:2] == 2) begin
+            if (config_axilite.araddr[7:2] == 2) begin
 
+                cfg_rdata_d[31:1] = '0;
                 cfg_rdata_d[0] = ien_q;
 
             end else 
             // INTERRUPT STATUS     - Addr = 0xC
-            if (config_axilite.awaddr[7:2] == 3) begin
+            if (config_axilite.araddr[7:2] == 3) begin
 
+                cfg_rdata_d[31:1] = '0;
                 cfg_rdata_d[0] = intr_q;
 
             end else 

@@ -64,8 +64,8 @@ ${PULP_DIR}/axi/include/axi/assign.svh
 ${PULP_DIR}/axi/src/axi_serializer.sv
 ${PULP_DIR}/axi/src/axi_err_slv.sv
 ${PULP_DIR}/axi/src/axi_demux.sv
+${PULP_DIR}/axi/src/axi_demux_simple.sv
 ${PULP_DIR}/axi/src/axi_cut.sv
-${PULP_DIR}/axi/src/axi_dw_upsizer.sv
 ${PULP_DIR}/axi/src/axi_lite_join.sv
 ${PULP_DIR}/axi/src/axi_xbar.sv
 ${PULP_DIR}/axi/src/axi_intf.sv
@@ -79,9 +79,8 @@ ${PULP_DIR}/axi/src/axi_cdc_dst.sv
 ${PULP_DIR}/axi/src/axi_iw_converter.sv
 ${PULP_DIR}/axi/src/axi_id_prepend.sv
 ${PULP_DIR}/axi/src/axi_delayer.sv
-${PULP_DIR}/axi/src/axi_dw_converter.sv
+${PULP_DIR}/axi/src/axi_lite_dw_converter.sv
 ${PULP_DIR}/axi/src/axi_cdc.sv
-${PULP_DIR}/axi/src/axi_sim_mem.sv
 ${PULP_DIR}/axi/src/axi_lite_to_axi.sv
 ${PULP_DIR}/axi/src/axi_cdc_src.sv
 ${PULP_DIR}/axi/src/axi_modify_address.sv
@@ -90,7 +89,6 @@ ${PULP_DIR}/axi/src/axi_lite_regs.sv
 ${PULP_DIR}/axi/src/axi_to_axi_lite.sv
 ${PULP_DIR}/axi/src/axi_burst_splitter.sv
 ${PULP_DIR}/axi/src/axi_lite_xbar.sv
-${PULP_DIR}/axi/src/axi_dw_downsizer.sv
 ${PULP_DIR}/axi/src/axi_lite_mux.sv
 ${PULP_DIR}/axi/src/axi_id_remap.sv
 ${PULP_DIR}/axi/src/axi_id_serialize.sv
@@ -118,6 +116,7 @@ ${RTL_DIR}/src/dma/redma/src/w_engine.sv
 ${RTL_DIR}/src/axi/axi_lite_2ram.sv
 ${RTL_DIR}/src/axi/axi_full_2ram.sv
 ${RTL_DIR}/src/axi/axi_mem_slave.sv
+${RTL_DIR}/src/axi/axi_lite_err_slv_intf.sv
 ${RTL_DIR}/src/common/cdc_sync_reg.sv
 ${RTL_DIR}/src/common/cnt_dualctx.sv
 ${RTL_DIR}/src/common/fifo_memory_ff.sv

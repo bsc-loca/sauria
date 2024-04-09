@@ -149,7 +149,7 @@ always_comb begin : demux_sel
     // Only if valid
     if (dma_req.aw_valid) begin
         // Switch to 1 if data region is selected
-        if ((dma_req.aw.addr & sauria_addr_pkg::DMA_ADDR_MASK) == sauria_addr_pkg::SAURIA_DMA_OFFSET) begin
+        if ((dma_req.aw.addr & sauria_addr_pkg::SAURIA_DMA_ADDR_MASK) == sauria_addr_pkg::SAURIA_DMA_OFFSET) begin
             demx_aw_sel = 1'b1;
         end else begin
             demx_aw_sel = 1'b0;
@@ -159,7 +159,7 @@ always_comb begin : demux_sel
     // Only if valid
     if (dma_req.ar_valid) begin
         // Switch to 1 if data region is selected
-        if ((dma_req.ar.addr & sauria_addr_pkg::DMA_ADDR_MASK) == sauria_addr_pkg::SAURIA_DMA_OFFSET) begin
+        if ((dma_req.ar.addr & sauria_addr_pkg::SAURIA_DMA_ADDR_MASK) == sauria_addr_pkg::SAURIA_DMA_OFFSET) begin
             demx_ar_sel = 1'b1;
         end else begin
             demx_ar_sel = 1'b0;
@@ -267,6 +267,7 @@ redma_top #(
 // AXI Demux
 axi_demux #(
     .AxiIdWidth     (DATA_AXI_ID_WIDTH),
+    .AtopSupport    (1'b0),
     .aw_chan_t      (aw_chan_t),
     .w_chan_t       (w_chan_t),
     .b_chan_t       (b_chan_t),
@@ -278,7 +279,6 @@ axi_demux #(
     .MaxTrans       (8),                    // Not sure how to dimension this...
     .AxiLookBits    (DATA_AXI_ID_WIDTH),    // Not sure how to dimension this...
     .UniqueIds      (1'b1),                 // Less than or equal to ID (so set it to ID) 
-    .FallThrough    (1'b0),                 
     .SpillAw        (1'b1),                 // Add spill registers before the multiplexer (+1 latency)
     .SpillW         (1'b1),
     .SpillB         (1'b1),

@@ -81,7 +81,6 @@ ${PULP_DIR}/axi/src/axi_id_prepend.sv
 ${PULP_DIR}/axi/src/axi_delayer.sv
 ${PULP_DIR}/axi/src/axi_lite_dw_converter.sv
 ${PULP_DIR}/axi/src/axi_cdc.sv
-${PULP_DIR}/axi/src/axi_sim_mem.sv
 ${PULP_DIR}/axi/src/axi_lite_to_axi.sv
 ${PULP_DIR}/axi/src/axi_cdc_src.sv
 ${PULP_DIR}/axi/src/axi_modify_address.sv

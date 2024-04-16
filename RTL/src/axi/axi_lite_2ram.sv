@@ -360,7 +360,7 @@ module axi_lite_2ram #(
     // Default R channel throws an error.
     r_chan = r_chan_lite_t'{
       data: axi_data_t'(32'hBA5E1E55),
-      resp: axi_pkg::RESP_SLVERR,
+      resp: axi_pkg::RESP_OKAY,
       default: '0
     };
 

@@ -35,12 +35,15 @@ package sauria_addr_pkg;
     parameter SRAMC_OFFSET      = 32'h0003_0000;
 
     // DMA Internal Address Space
-    parameter SAURIA_DMA_OFFSET = 32'hD000_0000;
+    parameter SAURIA_DMA_OFFSET         = 32'hD000_0000;
+    parameter SAURIA_DMA_ADDR_MASK      = 32'hF000_0000;
 
     // Address masks
-    parameter DMA_ADDR_MASK     = 32'hF000_0000;
-    parameter AXI_ADDR_MASK     = 32'hFFF0_0000;
-    parameter MEM_ADDR_MASK     = 32'h000F_0000;
-    parameter REG_ADDR_MASK     = 32'h0000_0F00;
+    parameter AXI_CONTROLLER_ADDR_MASK      = 32'hFFFF_FF00;
+    parameter AXI_SAURIA_ADDR_MASK          = 32'hFFF0_0000;
+    parameter AXI_DMA_ADDR_MASK             = 32'hFFFF_FFC0;
+
+    parameter SAURIA_MEM_ADDR_MASK          = 32'h000F_0000;
+    parameter SAURIA_REG_ADDR_MASK          = 32'h000F_FE00;
 
 endpackage

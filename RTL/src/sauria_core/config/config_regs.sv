@@ -183,7 +183,6 @@ logic mem_switch_q, mem_switch_q_prv, mem_switch_d;
 logic mem_keep_A_d, mem_keep_A_q;
 logic mem_keep_B_d, mem_keep_B_q;
 logic mem_keep_C_d, mem_keep_C_q;
-logic implicit_map_q, implicit_map_q2, implicit_map_d;
 logic global_ien_d, global_ien_q;
 logic done_ien_d, done_ien_q;
 logic done_intr_d, done_intr_q;
@@ -270,7 +269,6 @@ always_ff @(posedge i_clk or negedge i_rstn) begin : registers
         start_q_prv <= 0;
         idle_q <= 1;
         ready_q <= 1;
-        implicit_map_q <= 1;
         mem_switch_q <= 0;
         mem_switch_q_prv <= 0;
         mem_keep_A_q <= 0;
@@ -288,7 +286,6 @@ always_ff @(posedge i_clk or negedge i_rstn) begin : registers
         reg_act_q <= 0;
         reg_wei_q <= 0;
         reg_out_q <= 0;
-        implicit_map_q2 <= 0;
         reg_con_q2 <= 0;
         reg_act_q2 <= 0;
         reg_wei_q2 <= 0;
@@ -300,7 +297,6 @@ always_ff @(posedge i_clk or negedge i_rstn) begin : registers
         start_q_prv <= start_q;
         idle_q <= idle_d;
         ready_q <= ready_d;
-        implicit_map_q <= implicit_map_d;
         mem_switch_q <= mem_switch_d;
         mem_switch_q_prv <= mem_switch_q;
         mem_keep_A_q <= mem_keep_A_d;
@@ -321,7 +317,6 @@ always_ff @(posedge i_clk or negedge i_rstn) begin : registers
 
         // Secondary registers hold the previous data and are only updated on rising edge of start
         if (start_edge & ready_q) begin
-            implicit_map_q2 <= implicit_map_q;
             reg_con_q2 <= reg_con_q;
             reg_act_q2 <= reg_act_q;
             reg_wei_q2 <= reg_wei_q;
@@ -329,12 +324,6 @@ always_ff @(posedge i_clk or negedge i_rstn) begin : registers
         end
     end
 end
-
-// Explicit Map == 0 forces outputs to default values (UNSUPPORTED ATM)
-//assign reg_con_mux = (implicit_map_q2) ? reg_con_q2 : reg_con_default;
-//assign reg_act_mux = (implicit_map_q2) ? reg_act_q2 : reg_act_default;
-//assign reg_wei_mux = (implicit_map_q2) ? reg_wei_q2 : reg_wei_default;
-//assign reg_out_mux = (implicit_map_q2) ? reg_out_q2 : reg_out_default;
 
 assign reg_con_mux = reg_con_q2;
 assign reg_act_mux = reg_act_q2;
@@ -383,7 +372,7 @@ always_comb begin
     addressing_idx = i_address[SUB_ADR_W-1:IF_LSB_BITS];
 
     // If not selected, writes and reads are disabled
-    if ((i_address & sauria_addr_pkg::MEM_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) begin
+    if ((i_address & sauria_addr_pkg::SAURIA_MEM_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) begin
         wren = i_wren;
         rden = i_rden;
     end else begin
@@ -452,7 +441,6 @@ always_comb begin
     start_d = start_q;
     done_d = done_q;
     auto_restart_d = auto_restart_q;
-    implicit_map_d = implicit_map_q;
     mem_switch_d = mem_switch_q;
     mem_keep_A_d = mem_keep_A_q;
     mem_keep_B_d = mem_keep_B_q;
@@ -503,7 +491,8 @@ always_comb begin
                 // Control signals (Index = 0x0 [Addr = 0x000000])
                 // *************************************************
 
-                if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 0) begin
+                if      (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                        (i_address[SUB_ADR_W-1:0] == 8'h0)) begin
 
                     if (bb==0)      start_d         = i_data_in[bb];
                     if (bb==1)      done_d          = done_q & (~i_data_in[bb]);    // COW
@@ -512,8 +501,7 @@ always_comb begin
                     if (bb==17)     mem_keep_A_d    = i_data_in[bb];
                     if (bb==18)     mem_keep_B_d    = i_data_in[bb];
                     if (bb==19)     mem_keep_C_d    = i_data_in[bb];
-                    if (bb==24)     implicit_map_d  = i_data_in[bb];
-                    if (bb==32)     soft_rst_d      = i_data_in[bb];
+                    if (bb==23)     soft_rst_d      = i_data_in[bb];
 
                 end
 
@@ -521,7 +509,8 @@ always_comb begin
                 // Global Interrupt Enable (Index = 0x1 [Addr = 0x000004])
                 // ********************************************************
 
-                else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 1) begin
+                else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                        (i_address[SUB_ADR_W-1:0] == 8'h4)) begin
 
                     if (bb==0)      global_ien_d    = i_data_in[bb];
 
@@ -531,7 +520,8 @@ always_comb begin
                 // IP Interrupt Enable (Index = 0x2 [Addr = 0x000008])
                 // ****************************************************
 
-                else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 2) begin
+                else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                        (i_address[SUB_ADR_W-1:0] == 8'h8)) begin
 
                     if (bb==0)      done_ien_d      = i_data_in[bb];
 
@@ -541,7 +531,8 @@ always_comb begin
                 // IP Interrupt Status (Index = 0x3 [Addr = 0x00000C])
                 // ****************************************************
 
-                else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 3) begin
+                else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                        (i_address[SUB_ADR_W-1:0] == 8'hC)) begin
 
                     if (bb==0)      done_intr_d      = done_intr_q & (~i_data_in[bb]); // COW
 
@@ -551,7 +542,7 @@ always_comb begin
                 // Control Config region (Offset = CON_OFFSET)
                 // *********************************************
 
-                else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_CON_OFFSET) begin
+                else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_CON_OFFSET) begin
                     reg_con_d[addressing_idx][bb] = i_data_in[bb];
                 end
 
@@ -559,7 +550,7 @@ always_comb begin
                 // Activation config region (Offset = ACT_OFFSET)
                 // ***********************************************
 
-                else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_ACT_OFFSET) begin
+                else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_ACT_OFFSET) begin
                     reg_act_d[addressing_idx][bb] = i_data_in[bb];
                 end
 
@@ -567,7 +558,7 @@ always_comb begin
                 // Weight config region (Offset = WEI_OFFSET)
                 // ********************************************
 
-                else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_WEI_OFFSET) begin
+                else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_WEI_OFFSET) begin
                     reg_wei_d[addressing_idx][bb] = i_data_in[bb];
                 end
 
@@ -575,7 +566,7 @@ always_comb begin
                 // Output config region (Offset = OUT_OFFSET)
                 // ********************************************
 
-                else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_OUT_OFFSET) begin
+                else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_OUT_OFFSET) begin
                     reg_out_d[addressing_idx][bb] = i_data_in[bb];
                 end
             end
@@ -600,8 +591,8 @@ end
 
 always_comb begin
 
-    // Output data defaults to zero
-    out_databuf_d = 0;
+    // Output data defaults to "bad address 3"
+    out_databuf_d = 32'h2BADADD2;
 
     // Only when rden we take the values out
     if (rden) begin
@@ -610,8 +601,10 @@ always_comb begin
         // Control signals (Index = 0x0 [Addr = 0x000000])
         // *************************************************
 
-        if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 0) begin
+        if      (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h0)) begin
 
+            out_databuf_d = '0;
             out_databuf_d[0] =  start_q;
             out_databuf_d[1] =  done_q;
             out_databuf_d[2] =  idle_q;
@@ -621,15 +614,18 @@ always_comb begin
             out_databuf_d[17] = mem_keep_A_q;
             out_databuf_d[18] = mem_keep_B_q;
             out_databuf_d[19] = mem_keep_C_q;
-            out_databuf_d[24] = implicit_map_q;
-            out_databuf_d[31] = soft_rst_q;
+            out_databuf_d[23] = soft_rst_q;
+            out_databuf_d[31:24] = 8'hAC;
         end
 
         // ********************************************************
         // Global Interrupt Enable (Index = 0x1 [Addr = 0x000004])
         // ********************************************************
 
-        else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 1) begin
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h4)) begin
+
+            out_databuf_d = '0;
             out_databuf_d[0] = global_ien_q;
         end
 
@@ -637,7 +633,10 @@ always_comb begin
         // IP Interrupt Enable (Index = 0x2 [Addr = 0x000008])
         // ****************************************************
 
-        else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 2) begin
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h8)) begin
+
+            out_databuf_d = '0;
             out_databuf_d[0] = done_ien_q;
         end
 
@@ -645,7 +644,10 @@ always_comb begin
         // IP Interrupt Status (Index = 0x3 [Addr = 0x00000C])
         // ****************************************************
 
-        else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 3) begin
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'hC)) begin
+
+            out_databuf_d = '0;
             out_databuf_d[0] = done_intr_q;
         end
 
@@ -653,7 +655,9 @@ always_comb begin
         // Status flags (Index = 0x4 [Addr = 0x000010])
         // *************************************************
 
-        else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 4) begin
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h10)) begin
+
             out_databuf_d = status_q;
         end
 
@@ -661,7 +665,9 @@ always_comb begin
         // Cycle Counter (Index = 0x5 [Addr = 0x000014])
         // *************************************************
 
-        else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 5) begin
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h14)) begin
+
             out_databuf_d = cycle_cnt_q;
         end
 
@@ -669,7 +675,9 @@ always_comb begin
         // Stalls Counter (Index = 0x6 [Addr = 0x000018])
         // *************************************************
 
-        else if (i_address[SUB_ADR_W+4-1:IF_LSB_BITS] == 6) begin
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h18)) begin
+
             out_databuf_d = stalls_cnt_q;
         end
 
@@ -677,7 +685,7 @@ always_comb begin
         // Control Config region (Offset = CON_OFFSET)
         // *********************************************
 
-        else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_CON_OFFSET) begin
+        else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_CON_OFFSET) begin
             if (addressing_idx<TOTAL_REGS_CON) begin
                 out_databuf_d = reg_con_q[addressing_idx];
             end
@@ -687,7 +695,7 @@ always_comb begin
         // Activation config region (Offset = ACT_OFFSET)
         // ***********************************************
 
-        else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_ACT_OFFSET) begin
+        else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_ACT_OFFSET) begin
             if (addressing_idx<TOTAL_REGS_ACT) begin
                 out_databuf_d = reg_act_q[addressing_idx];
             end
@@ -697,7 +705,7 @@ always_comb begin
         // Weight config region (Offset = WEI_OFFSET)
         // ********************************************
 
-        else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_WEI_OFFSET) begin
+        else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_WEI_OFFSET) begin
             if (addressing_idx<TOTAL_REGS_WEI) begin
                 out_databuf_d = reg_wei_q[addressing_idx];
             end
@@ -707,7 +715,7 @@ always_comb begin
         // Output config region (Offset = OUT_OFFSET)
         // ********************************************
 
-        else if ((i_address & sauria_addr_pkg::REG_ADDR_MASK)==sauria_addr_pkg::CFG_OUT_OFFSET) begin
+        else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_OUT_OFFSET) begin
             if (addressing_idx<TOTAL_REGS_OUT) begin
                 out_databuf_d = reg_out_q[addressing_idx];
             end

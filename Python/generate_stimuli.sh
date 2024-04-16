@@ -11,6 +11,6 @@ else
       echo ""
 fi
 
-sed -i "42s/.*/    \"test_type\" :           \"$TEST_TYPE\",/" helpers/test_helper.py
+sed -i "43s/.*/    \"test_type\" :           \"$TEST_TYPE\",/" helpers/test_helper.py
 
 python3 tb_sauria_generator.py

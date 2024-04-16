@@ -8,6 +8,7 @@ veri_opt_flags = -O2 -CFLAGS "-O2"
 veri_flags = \
 	-DVERILATOR_GCC \
 	+define+$(arith) \
+	+define+COMMON_CELLS_ASSERTS_OFF \
 	+incdir+$(PULP_DIR)/axi/include \
 	+incdir+$(PULP_DIR)/common_cells/include \
 	--top-module $(tb_top) \

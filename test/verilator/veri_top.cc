@@ -76,8 +76,15 @@ void cfg_req_write(Vsauria_tester* top, uint32_t address, uint32_t data) {
     top->cfg_bus_lite_w_valid = 1;
 }
 
-// CHECK RESPONSE OF CFG AXI
-int cfg_check_resp(Vsauria_tester* top, uint8_t status) {
+// READ DATA FROM CFG AXI
+void cfg_req_read(Vsauria_tester* top, uint32_t address) {
+    top->cfg_bus_lite_ar_addr = address;
+    top->cfg_bus_lite_ar_valid = 1;
+    top->cfg_bus_lite_r_ready = 1;
+}
+
+// CHECK RESPONSE OF CFG AXI WRITES
+int cfg_check_wresp(Vsauria_tester* top, uint8_t status) {
 
     if (top->cfg_bus_lite_aw_ready && top->cfg_bus_lite_aw_valid) {
         top->cfg_bus_lite_aw_valid = 0;
@@ -87,6 +94,25 @@ int cfg_check_resp(Vsauria_tester* top, uint8_t status) {
     if (top->cfg_bus_lite_w_ready && top->cfg_bus_lite_w_valid) {
         top->cfg_bus_lite_w_valid = 0;
         status = status | 0x2;
+    } 
+    
+    return status;
+}
+
+// CHECK RESPONSE OF CFG AXI READS
+int cfg_check_rresp(Vsauria_tester* top, uint8_t status, uint32_t* data_buf) {
+
+    if (top->cfg_bus_lite_ar_ready && top->cfg_bus_lite_ar_valid) {
+        top->cfg_bus_lite_ar_valid = 0;
+        status = status | 0x1;
+    }
+
+    if (top->cfg_bus_lite_r_ready && top->cfg_bus_lite_r_valid) {
+        top->cfg_bus_lite_r_ready = 0;
+        status = status | 0x2;
+
+        // Write read data into buffer
+        *data_buf = top->cfg_bus_lite_r_data;
     } 
     
     return status;
@@ -113,6 +139,7 @@ int main(int argc, char** argv, char** env) {
     uint64_t idx_cfg = 0;
     int dma_status = 3;
     int cfg_status = 3;
+    bool read_in_progress = 0;
 
     unsigned int test_tiles, n_tests;
     unsigned int test_idx = 0;
@@ -121,6 +148,8 @@ int main(int argc, char** argv, char** env) {
     bool cfg_wren, cfg_rden, cfg_wait4sauria;
     bool check_flag;
     bool lower_intr_flag = 0;
+    uint32_t rd_databuf;
+    uint32_t expected_rd;
 
     uint32_t total_errors = 0;
 
@@ -133,14 +162,17 @@ int main(int argc, char** argv, char** env) {
         else if(*it == "+vcd") {
             vcd_enable = true;
         }
-        else if(*it == "bmk_small") {
+        else if(*it == "conv_validation") {
             test_type = 0;
         }
-        else if(*it == "bmk_torture") {
+        else if(*it == "bmk_small") {
             test_type = 1;
         }
-        else if(*it == "conv_validation") {
+        else if(*it == "bmk_torture") {
             test_type = 2;
+        }
+        else if(*it == "debug_test") {
+            test_type = 3;
         }
         else if(it->find("+max-cycles=") == 0) {
             max_time = strtoul(it->substr(strlen("+max-cycles=")).c_str(), NULL, 10);
@@ -182,14 +214,18 @@ int main(int argc, char** argv, char** env) {
     std::cout << "Reading stimuli from file..." << std::endl;
     string filename, stim_path;
 
-    if (test_type==0) {
+    if (test_type==1) {
         stim_path.assign("../stimuli/bmk_small/");
         std::cout << "Executing bmk_small - 4 large convolutions." << std::endl;
     }
-    else if (test_type==1) {
+    else if (test_type==2) {
         stim_path.assign("../stimuli/bmk_torture/");
         std::cout << "Executing bmk_torture - 40 large convolutions." << std::endl;
         std::cout << "NOTE!: Currently experiencing some errors... Debugging coming soon." << std::endl;
+    }
+    else if (test_type==3) {
+        stim_path.assign("../stimuli/debug_test/");
+        std::cout << "Executing debug_test" << std::endl;
     }
     else {
         stim_path.assign("../stimuli/conv_validation/");
@@ -209,6 +245,7 @@ int main(int argc, char** argv, char** env) {
     filename = stim_path + "tstcfg.txt";
     #endif
 
+    // Count number of lines in tstcfg.txt
     cntFile0.open(filename);
     if (!cntFile0.is_open()) {
         cout<<"Error opening file: "<< filename << " \n";
@@ -250,6 +287,7 @@ int main(int argc, char** argv, char** env) {
     filename = stim_path + "GoldenStimuli.txt";
     #endif
 
+    // Count number of lines in GoldenStimuli.txt
     cntFile1.open(filename);
     if (!cntFile1.is_open()) {
         cout<<"Error opening file: "<< filename << " \n";
@@ -291,6 +329,7 @@ int main(int argc, char** argv, char** env) {
     filename = stim_path + "GoldenOutputs.txt";
     #endif
 
+    // Count number of lines in GoldenOutputs.txt
     cntFile2.open(filename);
     if (!cntFile2.is_open()) {
         cout<<"Error opening file: "<< filename << " \n";
@@ -330,8 +369,9 @@ int main(int argc, char** argv, char** env) {
     //#####################################################################
     //########################## MAIN LOOP ################################
     //#####################################################################
-    while (!Verilated::gotFinish() && (!done) && (!exit_code || exit_delay > 1)
-    && (max_time == 0 || main_time < max_time) && (exit_delay != 1)) {
+    while (!Verilated::gotFinish() && (!done) && (idx_cfg < N_LINES_STIM)
+        && (max_time == 0 || main_time < max_time)
+        && (!exit_code || exit_delay > 1)  && (exit_delay != 1)) {
         
         // RAISE RST
         if(main_time > 100) {
@@ -391,7 +431,7 @@ int main(int argc, char** argv, char** env) {
                         cfg_req_write(top, 0xC, 0xF);
                         cfg_status = 0;
                     } else {
-                        cfg_status = cfg_check_resp(top, cfg_status);
+                        cfg_status = cfg_check_wresp(top, cfg_status);
 
                         // Advance pointer only on success
                         if ((cfg_status==3) && (top->ctrl_interrupt==0)) {lower_intr_flag=0;}
@@ -429,27 +469,53 @@ int main(int argc, char** argv, char** env) {
                             break;
                     }
 
-                    check_flag = OutArray[2*idx_cfg+1];
+                    expected_rd =   OutArray[2*idx_cfg+0];
+                    check_flag =    OutArray[2*idx_cfg+1];
 
                     // WRITE
                     if (cfg_wren) {
 
-                         // Write to CFG interface if previous transaction is done
+                        // Write to CFG interface if previous transaction is done
                         if (cfg_status==3) {
                             cfg_req_write(top, cfg_addr, cfg_data_in);
                             cfg_status = 0;
+                            // Debug test print
+                            if (test_type==3) std::cout << std::hex << std::uppercase << "Writing " << cfg_data_in << " into address " << cfg_addr << std::dec << std::endl;
                         } else {
-                            cfg_status = cfg_check_resp(top, cfg_status);
+                            cfg_status = cfg_check_wresp(top, cfg_status);
 
                             // Advance pointer only on success
                             if (cfg_status==3) {idx_cfg++;}
                         }
 
-                    // READ => Not supported atm
+                    // READ
                     } else if (cfg_rden) {
-                        idx_cfg++;
 
-                        // TO-DO
+                        // If a read is in progress, wait until it is complete (no concatenation for reads)
+                        if (read_in_progress) {
+
+                            cfg_status = cfg_check_rresp(top, cfg_status, &rd_databuf);
+                            if (cfg_status==3) {
+                                // Debug test print
+                                if (test_type==3) std::cout << std::hex << std::uppercase << "Read " << rd_databuf << " from address " << cfg_addr << std::dec << std::endl;
+                                idx_cfg++;
+                                read_in_progress = 0;
+                            }
+
+                        // If read not in progress, start it asap
+                        } else {
+                            // Start read from CFG interface if previous transaction is done
+                            if (cfg_status==3) {
+                                cfg_req_read(top, cfg_addr);
+                                cfg_status = 0;
+                                read_in_progress = 1;
+                            } else {
+                                cfg_status = cfg_check_wresp(top, cfg_status);
+
+                                // Advance pointer only on success
+                                if (cfg_status==3) {idx_cfg++;}
+                            }
+                        }
 
                     // OTHERS => Advance pointer
                     } else {
@@ -470,24 +536,36 @@ int main(int argc, char** argv, char** env) {
         }
 
         // CHECK DATA WHEN NEEDED
-        if (check_flag) {
-            top->test_idx = (test_idx-1);       // idx-1 because we always test the previous (when we extract data)
-            top->dram_startoffs = TestcfgArray[2+3*(test_idx-1)+1];
-            top->dram_endoffs = TestcfgArray[2+3*(test_idx-1)+2];
-            top->check_flag = 1;
-            check_flag = 0;
+        if (check_flag && (!read_in_progress)) {
+            // Debug test checks the data on the cfg interface
+            if (test_type==3) {
+                top->check_flag = 0;  // Do not activate check in HW model!
+                if (expected_rd != rd_databuf) {
+                    total_errors+=1;
+                    std::cout << "Error! Expected " << std::hex << expected_rd << std::dec << std::endl;
+                }
+                check_flag = 0;
 
-            if ((top->errors)>0){
-                std::cout << "[" << main_time << "] Test " << (test_idx-1) << " - \t failed with " << top->errors << " errors." << std::endl;
+            // All other tests check data in main memory (in HW model)
             } else {
-                std::cout << "[" << main_time << "] Test " << (test_idx-1) << " - \t passed with 0 errors :)" << std::endl;
-            }
+                top->test_idx = (test_idx-1);       // idx-1 because we always test the previous (when we extract data)
+                top->dram_startoffs = TestcfgArray[2+3*(test_idx-1)+1];
+                top->dram_endoffs = TestcfgArray[2+3*(test_idx-1)+2];
+                top->check_flag = 1;
+                check_flag = 0;
 
-            total_errors+=top->errors;
+                if ((top->errors)>0){
+                    std::cout << "[" << main_time << "] Test " << (test_idx-1) << " - \t failed with " << top->errors << " errors." << std::endl;
+                } else {
+                    std::cout << "[" << main_time << "] Test " << (test_idx-1) << " - \t passed with 0 errors :)" << std::endl;
+                }
 
-            // END OF TEST
-            if (test_idx == n_tests) {
-                done = 1;
+                total_errors+=top->errors;
+
+                // END OF TEST
+                if (test_idx == n_tests) {
+                    done = 1;
+                }
             }
 
         } else {

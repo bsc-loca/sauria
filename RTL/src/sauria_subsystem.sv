@@ -145,7 +145,14 @@ AXI_LITE #(
     ctrl_sauria_core(),ctrl_udma(),                                     // FROM DF CONTROLLER
     udma_cfg_port(),                                                    // UDMA PORT
     sauria_cfg_port_HF(),sauria_cfg_port_LF(),                          // SAURIA PORT, PRE- AND POST-CDC
-    cfg_demux[3:0](), core_cfg_mux[1:0](), dma_cfg_mux[1:0]();
+    err_slv_lite(),                                                     // AXI Lite Error Slave
+    cfg_demux[4:0](), core_cfg_mux[1:0](), dma_cfg_mux[1:0]();
+
+// AXI4 Lite Interfaces (Intermediate step on Lite->Full conversion)
+AXI_LITE #(
+  .AXI_ADDR_WIDTH (CFG_AXI_ADDR_WIDTH),
+  .AXI_DATA_WIDTH (DATA_AXI_DATA_WIDTH)
+)   debug_mem_sauria_intermediate();                                    // FROM AXI DW CONVERTER
 
 // AXI4 Interfaces (Masters)
 AXI_BUS #(
@@ -164,14 +171,6 @@ AXI_BUS #(
   .AXI_ID_WIDTH   (DATA_AXI_ID_WIDTH+1),
   .AXI_USER_WIDTH (1) // Unused, but 0 can cause compilation errors
 )   sauria_mem_port_HF(),sauria_mem_port_LF();                          // SAURIA PORT, PRE- AND POST-CDC
-
-// AXI4 Interfaces (Intermediate step on Lite->Full conversion)
-AXI_BUS #(
-  .AXI_ADDR_WIDTH (DATA_AXI_ADDR_WIDTH),
-  .AXI_DATA_WIDTH (CFG_AXI_DATA_WIDTH),
-  .AXI_ID_WIDTH   (DATA_AXI_ID_WIDTH),
-  .AXI_USER_WIDTH (1) // Unused, but 0 can cause compilation errors
-)   debug_mem_sauria_intermediate();                                    // FROM AXILITE2AXI
 
 // ------------------------------------------------------------
 // IO signals mapping
@@ -256,14 +255,13 @@ assign io_mem_port.b_valid =    i_dat_axi_bvalid;
 // ------------------------------------------------------------
 
 // Configuration IO Port Demux
-logic [1:0] lite_demx_aw_sel, lite_demx_ar_sel;
+logic [2:0] lite_demx_aw_sel, lite_demx_ar_sel;
 
 axi_lite_demux_intf #(
     .AxiAddrWidth   (CFG_AXI_ADDR_WIDTH),
     .AxiDataWidth   (CFG_AXI_DATA_WIDTH),
-    .NoMstPorts     (4),
+    .NoMstPorts     (5),
     .MaxTrans       (8),
-    .FallThrough    (1'b0),     
     .SpillAw        (1'b1),     // Add spill registers (+1 latency)
     .SpillW         (1'b1),
     .SpillB         (1'b1),
@@ -282,49 +280,60 @@ axi_lite_demux_intf #(
 `AXI_LITE_ASSIGN(cfg_controller,    cfg_demux[0])
 `AXI_LITE_ASSIGN(cfg_udma,          cfg_demux[1])
 `AXI_LITE_ASSIGN(cfg_sauria_core,   cfg_demux[2]) 
-`AXI_LITE_ASSIGN(cfg_mem_debug,     cfg_demux[3]) 
+`AXI_LITE_ASSIGN(cfg_mem_debug,     cfg_demux[3])
+`AXI_LITE_ASSIGN(err_slv_lite,      cfg_demux[4]) 
 
 // Demux Control
 always_comb begin : demux_sel
     
     // Default to zero (DF Controller)
-    lite_demx_aw_sel = 2'd0;
-    lite_demx_ar_sel = 2'd0;
+    lite_demx_aw_sel = 3'd4;
+    lite_demx_ar_sel = 3'd4;
 
     // AW - Controller region
-    if      ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
-        lite_demx_aw_sel = 2'd0;
+    if      ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_CONTROLLER_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
+        lite_demx_aw_sel = 3'd0;
     // AW - DMA region
-    else if ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
-        lite_demx_aw_sel = 2'd1;
+    else if ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_DMA_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
+        lite_demx_aw_sel = 3'd1;
     // AW - SAURIA region
-    else if ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
+    else if ((io_cfg_port.aw_addr & sauria_addr_pkg::AXI_SAURIA_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
         
         // SAURIA Core Config
-        if ((io_cfg_port.aw_addr & sauria_addr_pkg::MEM_ADDR_MASK) == 0)
-            lite_demx_aw_sel = 2'd2;
+        if ((io_cfg_port.aw_addr & sauria_addr_pkg::SAURIA_MEM_ADDR_MASK) == 0)
+            lite_demx_aw_sel = 3'd2;
         // SAURIA Memory Debug access
         else
-            lite_demx_aw_sel = 2'd3;
+            lite_demx_aw_sel = 3'd3;
     end
 
     // AR - Controller region
-    if      ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
-        lite_demx_ar_sel = 2'd0;
+    if      ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_CONTROLLER_ADDR_MASK) == sauria_addr_pkg::CONTROLLER_OFFSET)
+        lite_demx_ar_sel = 3'd0;
     // AR - DMA region
-    else if ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
-        lite_demx_ar_sel = 2'd1;
+    else if ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_DMA_ADDR_MASK) == sauria_addr_pkg::DMA_OFFSET)
+        lite_demx_ar_sel = 3'd1;
     // AR - SAURIA region
-    else if ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
+    else if ((io_cfg_port.ar_addr & sauria_addr_pkg::AXI_SAURIA_ADDR_MASK) == sauria_addr_pkg::SAURIA_OFFSET) begin
         
         // SAURIA Core Config
-        if ((io_cfg_port.ar_addr & sauria_addr_pkg::MEM_ADDR_MASK) == 0)
-            lite_demx_ar_sel = 2'd2;
+        if ((io_cfg_port.ar_addr & sauria_addr_pkg::SAURIA_MEM_ADDR_MASK) == 0)
+            lite_demx_ar_sel = 3'd2;
         // SAURIA Memory Debug access
         else
-            lite_demx_ar_sel = 2'd3;
+            lite_demx_ar_sel = 3'd3;
     end
 end
+
+// Error slave to catch unmapped addresses
+axi_lite_err_slv_intf #(
+    .AxiDataWidth (CFG_AXI_DATA_WIDTH),
+    .ReadDataWord (32'h0BADADD2)
+) err_slv_i (
+    .clk    (i_system_clk),
+    .rstn   (i_system_rstn),
+    .slv    (err_slv_lite)
+);
 
 // SAURIA config port Mux
 axi_lite_mux_intf #(
@@ -332,7 +341,6 @@ axi_lite_mux_intf #(
     .AxiDataWidth   (CFG_AXI_DATA_WIDTH),
     .NoSlvPorts     (2),
     .MaxTrans       (8),
-    .FallThrough    (1'b0),     
     .SpillAw        (1'b1),     // Add spill registers (+1 latency)
     .SpillW         (1'b1),
     .SpillB         (1'b1),
@@ -355,7 +363,6 @@ axi_lite_mux_intf #(
     .AxiDataWidth   (CFG_AXI_DATA_WIDTH),
     .NoSlvPorts     (2),
     .MaxTrans       (8),
-    .FallThrough    (1'b0),     
     .SpillAw        (1'b1),     // Add spill registers (+1 latency)
     .SpillW         (1'b1),
     .SpillB         (1'b1),
@@ -372,34 +379,31 @@ axi_lite_mux_intf #(
 `AXI_LITE_ASSIGN(dma_cfg_mux[0],   cfg_udma)
 `AXI_LITE_ASSIGN(dma_cfg_mux[1],   ctrl_udma)
 
+// Data witdh upsizer to connect debug path to memories
+axi_lite_dw_converter_intf #(
+    .AXI_SLV_PORT_DATA_WIDTH    (CFG_AXI_DATA_WIDTH),
+    .AXI_MST_PORT_DATA_WIDTH    (DATA_AXI_DATA_WIDTH),
+    .AXI_ADDR_WIDTH             (CFG_AXI_ADDR_WIDTH)
+) debug_axi_upsize_i (
+    .clk_i              (i_system_clk),
+    .rst_ni             (i_system_rstn),
+    .slv                (cfg_mem_debug),
+    .mst                (debug_mem_sauria_intermediate)
+);
+
 // AXI Lite to AXI Full converter
 axi_lite_to_axi_intf #(
-    .AXI_DATA_WIDTH (CFG_AXI_DATA_WIDTH)
+    .AXI_DATA_WIDTH (DATA_AXI_DATA_WIDTH)
 ) axi_lite_to_axi_i (
     .slv_aw_cache_i     ('0),
     .slv_ar_cache_i     ('0),
-    .in                 (cfg_mem_debug),
-    .out                (debug_mem_sauria_intermediate)
+    .in                 (debug_mem_sauria_intermediate),
+    .out                (debug_mem_sauria)
 );
 
 // ------------------------------------------------------------
 // AXI (FULL) Network
 // ------------------------------------------------------------
-
-// Data witdh upsizer to connect debug path to memories
-axi_dw_converter_intf #(
-    .AXI_MAX_READS              (2),
-    .AXI_SLV_PORT_DATA_WIDTH    (CFG_AXI_DATA_WIDTH),
-    .AXI_MST_PORT_DATA_WIDTH    (DATA_AXI_DATA_WIDTH),
-    .AXI_ADDR_WIDTH             (DATA_AXI_ADDR_WIDTH),
-    .AXI_ID_WIDTH               (DATA_AXI_ID_WIDTH),
-    .AXI_USER_WIDTH (1) // Unused, but 0 can cause compilation errors
-) debug_axi_upsize_i (
-    .clk_i              (i_system_clk),
-    .rst_ni             (i_system_rstn),
-    .slv                (debug_mem_sauria_intermediate),
-    .mst                (debug_mem_sauria)
-);
 
 // SAURIA memory port Mux
 axi_mux_intf #(
@@ -410,7 +414,6 @@ axi_mux_intf #(
     .AXI_USER_WIDTH     (1),            // Unused, but 0 can cause compilation errors
     .NO_SLV_PORTS       (2),
     .MAX_W_TRANS        (8),
-    .FALL_THROUGH       (1'b0),         // Do not use fall-through
     .SPILL_AW           (1'b1),         // Add spill registers => +1 latency
     .SPILL_W            (1'b1),
     .SPILL_B            (1'b1),
@@ -461,7 +464,7 @@ axi_cdc_intf #(
     .LOG_DEPTH      (sauria_pkg::DATA_CDC_FIFO_BITS),
     .AXI_ADDR_WIDTH (DATA_AXI_ADDR_WIDTH),
     .AXI_DATA_WIDTH (DATA_AXI_DATA_WIDTH),
-    .AXI_ID_WIDTH   (DATA_AXI_ID_WIDTH),
+    .AXI_ID_WIDTH   (DATA_AXI_ID_WIDTH+1),
     .AXI_USER_WIDTH (1) // Unused, but 0 can cause compilation errors
 ) cdc_mem_i (
     .src_clk_i      (i_system_clk),
@@ -532,7 +535,8 @@ sauria_core #(
     .CFG_AXI_DATA_WIDTH             (CFG_AXI_DATA_WIDTH),
     .CFG_AXI_ADDR_WIDTH             (CFG_AXI_ADDR_WIDTH),
     .DATA_AXI_DATA_WIDTH            (DATA_AXI_DATA_WIDTH),
-    .DATA_AXI_ADDR_WIDTH            (DATA_AXI_ADDR_WIDTH)
+    .DATA_AXI_ADDR_WIDTH            (DATA_AXI_ADDR_WIDTH),
+    .DATA_AXI_ID_WIDTH              (DATA_AXI_ID_WIDTH+1)
 ) sauria_core_i(
     .i_clk      (i_sauria_clk),
     .i_rstn     (i_sauria_rstn),

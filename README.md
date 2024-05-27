@@ -1,4 +1,4 @@
-# SAURIA - Systolic Array tensor Unit for aRtificial Intelligence Acceleration
+# SAURIA - Systolic Array tensor Unit for Artificial Intelligence Acceleration
 
 SAURIA is a Convolutional Neural Network (CNN) accelerator based on an output stationary (OS) systolic array with on-chip, on-the-fly convolution lowering, written entirely in SystemVerilog. 
 

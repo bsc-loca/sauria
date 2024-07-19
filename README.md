@@ -47,6 +47,14 @@ Or, alternatively, using Conda:
 conda install --file Python/requirements_pip.txt
 ```
 
+The option to set up a Python virtual environment is also available:
+
+```bash
+source setup.sh
+cd Python
+source install_venv.sh
+```
+
 ## Running Simulations
 
 First, we generate a set of random convolutions and GEMMs using Python:

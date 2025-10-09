@@ -8,14 +8,18 @@ compile:hardware_emu:
         when: never
       - when: always
     script:
+        - cd ${CI_PROJECT_DIR}/tools
+        - source install_verilator.sh
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - cd ${CI_PROJECT_DIR}/test/verilator
         - source compile_sauria.sh
     artifacts:
-        expire_in: 1 weeks
+        expire_in: 1 days
         when: on_success
         paths:
             - ${CI_PROJECT_DIR}/test/verilator/verilator.log
             - ${CI_PROJECT_DIR}/test/verilator/Test-Sim
+            - ${CI_PROJECT_DIR}/tools/verilator/*
 
 test:debug_test:
     stage: test
@@ -29,6 +33,7 @@ test:debug_test:
         when: never
       - when: on_success
     script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
@@ -46,6 +51,7 @@ test:bmk_small:
         when: never
       - when: on_success
     script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
@@ -63,6 +69,7 @@ test:conv_validation:
         when: never
       - when: on_success
     script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts

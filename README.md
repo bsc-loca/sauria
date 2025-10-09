@@ -27,51 +27,22 @@ git submodule update --init --recursive
 
 SAURIA can be emulated using Verilator v4.224. We have observed issues with older and newer versions, so we recommend using a local installation as described below. A testbench for simulation with commercial RTL simulators (e.g. Synopsys VCS or Questa) is also provided.
 
-To install Verilator v4.224 locally, run:
+Before running any experiments, make sure to execute the setup script. The first time, it will automatically install the Python virtual environment with all dependencies needed to use the repo.
 
 ```bash
 source setup.sh
+```
+
+To install Verilator v4.224 locally, run:
+
+```bash
 cd tools/
 source install_verilator.sh
 ```
 
-To install the virtual Python environment with all required dependencies, run:
-
-```bash
-source setup.sh
-cd Python/
-source install_venv.sh
-```
-
 ## Running Simulations
 
-<!-- First, we generate a set of random convolutions and GEMMs using Python:
-
-```bash
-source setup.sh
-cd Python
-source generate_stimuli.sh bmk_small
-```
-
-Then, we can move to the test directory to compile and run the emulated accelerator using verilator:
-
-```bash
-cd ../test/verilator/
-source compile_sauria.sh
-source run_sauria_test.sh bmk_small
-```
-
-To visualize the waveforms of the simulation we have to generate a VCD dump and read it using GTKWave:
-
-```bash
-source run_sauria_test.sh bmk_small vcd
-source display_sauria_waves.sh new_test.vcd gtk_waves/sauria_8x16_fp16.gtkw -->
-```
-
-For VS Code users, to select the virtual environment as your Python interpreter in the Jupyter notebooks, manually add the environment as a Python interpreter:
-1. Ctrl+Shift+P to open the command palette
-2. Look for "Python: Select Interpreter"
-3. Select "Enter interpreter path" and search for: repo_root/Python/sauria-env/bin/python
+We provide an example Jupyter Notebook explaining step by step how to perform simulations with the repo, which you can find [here](Python/notebooks/example_basic.ipynb)(`Python/notebooks/example_basic.ipynb`).
 
 ## Publication
 

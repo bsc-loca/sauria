@@ -20,156 +20,13 @@ Jordi Fornt <jfornt@bsc.es>
 """
 
 import numpy as np
-import scipy.stats as stats
-import os
 import sys
-import copy
+import scipy.stats as stats
 
-from helpers import drac_sa_top_helper as dsth
 sys.path.insert(1, './../')
+import src.config_helper as cfg
+import src.data_helper as dh
 
-# ----------------------------
-# GLOBAL TEST OPTIONS DICT
-# ----------------------------
-
-TOPTS = {
-    # Test type - One of the following options:
-    # *******************************************
-    #       * conv_validation :     100 small convolutions to validate all shapes and modes
-    #       * bmk_small :           4 medium-sized convolutions with tiling
-    #       * bmk_torture :         40 large convolutions with tiling
-    #       * power_estimation :    1 small convolution with high PE utilization for power estimation
-    #       * debug_test :          testing different memory accesses
-    "test_type" :           "conv_validation",
-
-    # Additional options used for debugging
-    # *******************************************
-    "ones_test" :           False,      # Set all tensor elements to '1'
-    "insert_deadbeef" :     True,       # Insert regognizable values (0xDEAD, 0xBEEF, 0xBEBE, 0x0FE0) for easy debugging
-    "compute_macs" :        False,      # Compute cycle-accurate MAC results (SLOW)    
-    
-    # Random data generation options
-    # *******************************************
-    "gauss_scale" :         1.0,        # Scale used for gaussian data
-    "pzero_A" :             0.0,        # Probability of 0s in Tensor A
-    "pzero_B" :             0.0,        # Probability of 0s in Tensor B
-    "pzero_C" :             0.0,        # Probability of 0s in Tensor C
-
-    # Utility options
-    # *******************************************
-    "MainMem_smallregion_init" :   0x18000,     # Size used to initialize SMALL main memory structures
-    "MainMem_bigregion_init"   :   0x80000      # Size used to initialize BIG main memory structures
-}
-
-# -----------------------------
-# GLOBAL HARDWARE OPTIONS DICT
-# -----------------------------
-
-HOPTS = {
-    # Address offsets
-    # *******************************************
-    "MainMemory_offset" :   0x0000_0000,     # Starting address of data in main memory
-    "SAURIA_offset_DMA" :   0xD000_0000,     # SAURIA offset from the POV of DMA
-    "CTRL_offset" :         0x4410_0000,     # SAURIA controller offset
-    "CORE_offset" :         0x4420_0000,     # SAURIA core offset
-    "DMA_offset" :          0x4430_0000,     # uDMA offset
-    "CFG_CON_offset" :      0x0000_0200,     # Control registers offset
-    "CFG_IFM_offset" :      0x0000_0400,     # IFmap Feeder registers offset
-    "CFG_WEI_offset" :      0x0000_0600,     # Weight Fetcher registers offset
-    "CFG_PSM_offset" :      0x0000_0800,     # Partial sums manager offset
-    "MEMA_offset" :         0x0001_0000,     # MEM A access via AXI Lite
-    "MEMB_offset" :         0x0002_0000,     # MEM B access via AXI Lite
-    "MEMC_offset" :         0x0003_0000,     # MEM C access via AXI Lite
-    
-    # Memory Sizes
-    # *******************************************
-    "MEMA_W" :              128,
-    "MEMB_W" :              256,
-    "MEMC_W" :              128,
-    "MEMA_DEPTH" :          2048,
-    "MEMB_DEPTH" :          1024,
-    "MEMC_DEPTH" :          2048,
-
-    # Interface parameters
-    # *******************************************
-    "CFG_AXI_DATA_WIDTH" :  32,     # Configuration interface (AXI4-Lite)
-    "CFG_AXI_ADDR_WIDTH" :  32,
-    "DATA_AXI_DATA_WIDTH" : 128,    # Memory interface (AXI4)
-    "DATA_AXI_ADDR_WIDTH" : 32,
-
-    # Systolic Array HW parameters
-    # *******************************************
-    "X" :                   16,     # SA X size
-    "Y" :                   8,      # SA Y size
-    "DILP_W" :              64,     # Dilation parameter width
-    "PARAMS_W" :            8,      # General parameters width
-    "TH_W" :                2,      # Negligence threshold width
-    "IFM_FIFO_POSITIONS" :  5,      # IFmap Feeder FIFO positions
-    "WEI_FIFO_POSITIONS" :  4,      # Weight Fetcher FIFO positions
-    "FIFO_FILL_CYCLES" :    1,      # FIFO filling cycles before computation starts
-    
-    # Arithmetic options
-    # *******************************************
-    "IA_W" :                16,     # IFmap bits
-    "IB_W" :                16,     # Weight bits
-    "OC_W" :                16,     # Partial sum bits
-    "OP_TYPE" :             1,      # 0 for int, 1 for FP
-
-    # FP configuration
-    "IA_MANT" :             10,     # IFmap mantissa bits
-    "IB_MANT" :             10,     # Weight mantissa bits
-    "IC_MANT" :             10,     # Partial sum mantissa bits
-    "rounding" :            "RNE",  # Rounding type
-
-    # Approximate computing
-    "approx_comp" :         False,  # If false, all options are ignored
-    "mul_type" :            3,
-    "M" :                   14,
-    "add_type" :            4,
-    "A" :                   16
-}
-
-# Dependent parameters
-HOPTS['ADRA_W'] = int(np.ceil(np.log2(HOPTS['MEMA_DEPTH'])))
-HOPTS['ADRB_W'] = int(np.ceil(np.log2(HOPTS['MEMB_DEPTH'])))
-HOPTS['ADRC_W'] = int(np.ceil(np.log2(HOPTS['MEMC_DEPTH'])))
-
-HOPTS['MEMA_N'] = int(HOPTS['MEMA_W']/HOPTS['IA_W'])
-HOPTS['IFM_WOFS_W'] = int(np.ceil(np.log2(HOPTS['MEMA_N'])))
-HOPTS['IFM_IDX_W'] = HOPTS['ADRA_W'] + HOPTS['IFM_WOFS_W'] + 1
-
-HOPTS['MEMB_N'] = int(HOPTS['MEMB_W']/HOPTS['IB_W'])
-HOPTS['WEI_WOFS_W'] = int(np.ceil(np.log2(HOPTS['MEMB_N'])))
-HOPTS['WEI_IDX_W'] = HOPTS['ADRB_W'] + HOPTS['WEI_WOFS_W'] + 1
-
-HOPTS['MEMC_N'] = int(HOPTS['MEMC_W']/HOPTS['OC_W'])
-HOPTS['PSM_WOFS_W'] = int(np.ceil(np.log2(HOPTS['MEMC_N'])))
-HOPTS['PSM_IDX_W'] = HOPTS['ADRC_W'] + HOPTS['PSM_WOFS_W'] + 1
-
-HOPTS['HOST_N'] = int(HOPTS['DATA_AXI_DATA_WIDTH']/HOPTS['IA_W'])
-
-HOPTS['MEMA_size'] = HOPTS['MEMA_DEPTH'] * HOPTS['MEMA_N']
-HOPTS['MEMB_size'] = HOPTS['MEMB_DEPTH'] * HOPTS['MEMB_N']
-HOPTS['MEMC_size'] = HOPTS['MEMC_DEPTH'] * HOPTS['MEMC_N']
-
-HOPTS['MEMA_PART'] = int(np.ceil(HOPTS['MEMA_W']/64))
-HOPTS['MEMB_PART'] = int(np.ceil(HOPTS['MEMB_W']/64))
-HOPTS['MEMC_PART'] = int(np.ceil(HOPTS['MEMC_W']/64))
-        
-HOPTS['MAX_PART'] = 2   # Max 128b (for now)
-
-HOPTS['MEMA_HOST_N'] = int(np.ceil(HOPTS['MEMA_W']/HOPTS['DATA_AXI_DATA_WIDTH']))
-HOPTS['MEMB_HOST_N'] = int(np.ceil(HOPTS['MEMB_W']/HOPTS['DATA_AXI_DATA_WIDTH']))
-HOPTS['MEMC_HOST_N'] = int(np.ceil(HOPTS['MEMC_W']/HOPTS['DATA_AXI_DATA_WIDTH']))
-        
-HOPTS['HOST_PART'] = int(np.ceil(HOPTS['DATA_AXI_DATA_WIDTH']/64))
-
-HOPTS['MEMA_CFG_N'] = int(np.ceil(HOPTS['MEMA_W']/HOPTS['CFG_AXI_DATA_WIDTH']))
-HOPTS['MEMB_CFG_N'] = int(np.ceil(HOPTS['MEMB_W']/HOPTS['CFG_AXI_DATA_WIDTH']))
-HOPTS['MEMC_CFG_N'] = int(np.ceil(HOPTS['MEMC_W']/HOPTS['CFG_AXI_DATA_WIDTH']))    
-
-HOPTS['intyp'] = np.float16 if (HOPTS['OP_TYPE']==1) else np.int64
-        
 # ---------------------------------------------------
 # Void test array (for when we don't want fix tests)
 # ---------------------------------------------------
@@ -289,7 +146,7 @@ def gen_limit_tests(TEST_PARAMS_DEF, PARAMS_LIST, X, Y):
         PARAMS_LIST[8].append(Xu)
         PARAMS_LIST[9].append(Yu)
         PARAMS_LIST[10].append(1)
-        
+
 # ------------------------------
 # RANDOM TESTS
 # ------------------------------
@@ -632,7 +489,7 @@ def gen_torture_bmk_fix_tests(X, Y, MEMC_size):
 # Get current Convolution Test limits
 # ----------------------------------------------
 
-def get_conv_limits():
+def get_conv_limits(HOPTS):
 
     TEST_PARAMS_list = [
         ['Bw',      1,      64],
@@ -650,18 +507,157 @@ def get_conv_limits():
 
     return TEST_PARAMS_list
 
+# --------------------------------------
+# Configuration & debug bus test
+# --------------------------------------
+
+def gen_cfg_test(HOPTS):
+
+    # Max number of vectors
+    N_VECTORS = 600
+
+    # Create control words
+    # ----------------------------------
+
+    cfg_address = np.zeros((N_VECTORS), dtype=np.uint32)
+    cfg_data_in = np.zeros((N_VECTORS), dtype=np.uint64)
+    cfg_wren = np.zeros((N_VECTORS), dtype=np.uint32)
+    cfg_rden = np.zeros((N_VECTORS), dtype=np.uint32)
+    cfg_waitflag = np.zeros((N_VECTORS), dtype=np.uint32)
+    
+    cfg_checkflag = np.zeros((N_VECTORS), dtype=np.uint32)
+    cfg_data_out = np.zeros((N_VECTORS), dtype=np.uint64)
+
+    cfg = [cfg_address, cfg_data_in, cfg_wren, cfg_rden, cfg_waitflag, cfg_checkflag, cfg_data_out]
+
+    # Debug test
+    # ----------------------------------
+
+    idx = 0
+
+    # ACCESS CONTROLLER REGISTERS
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x0,      0xC000_0000)
+    idx+=5 # Wait
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x10,     0xDEAD_BEEF)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x48,     0xBEEF_DEAD)
+    idx+=5 # Wait
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x10,     0xDEAD_BEEF)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x48,     0xBEEF_DEAD)
+    idx+=50 # Wait
+
+    # ACCESS ReDMA REGISTERS
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["DMA_offset"]+0x0,       0x2D00_0000)
+    idx+=5 # Wait
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["DMA_offset"]+0x10,      0xDEAD_BEEF)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["DMA_offset"]+0x30,      0xBEEF_DEAD)
+    idx+=5 # Wait
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["DMA_offset"]+0x10,      0xDEAD_BEEF)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["DMA_offset"]+0x30,      0xBEEF_DEAD)
+    idx+=50 # Wait
+
+    # ACCESS SAURIA REGISTERS
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+0x0,      0xAC00_000C)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_CON_offset"],    0xDEAD_C201)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_IFM_offset"],    0xDEAD_1F9A)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_WEI_offset"],    0xDEAD_3E16)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_PSM_offset"],    0xDEAD_FE59)
+    idx+=5 # Wait
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_CON_offset"],    0xDEAD_C201)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_IFM_offset"],    0xDEAD_1F9A)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_WEI_offset"],    0xDEAD_3E16)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_PSM_offset"],    0xDEAD_FE59)
+    idx+=50 # Wait
+
+    # ACCESS SAURIA MEMORIES
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMA_offset"]+0x10,     0xDEAD_9E91)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMB_offset"]+0x50,     0xDEAD_9E92)
+    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMC_offset"]+0x90,     0xDEAD_9E93)
+    idx+=10 # Wait
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMA_offset"]+0x10,     0xDEAD_9E91)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMB_offset"]+0x50,     0xDEAD_9E92)
+    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMC_offset"]+0x90,     0xDEAD_9E93)
+    idx+=50 # Wait
+
+    # ACCESS UNMAPPED REGIONS
+    idx = cfg.wr_transaction(idx,cfg,   0x3333_3333,    0xDEEE_AAAD)    # Wrong high level mapping
+    idx+=5 # Wait
+    idx = cfg.rd_transaction(idx,cfg,   0x3333_3333,    0x0BAD_ADD2)    # Wrong high level mapping
+    idx+=5 # Wait
+    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CTRL_offset"]+0xFF,       0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg,   HOPTS["DMA_offset"]+0x38,        0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x30,       0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x1000,     0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CORE_offset"]+0xF_0000,   0xDEEE_AAAD)    # Unmapped regions
+    idx+=5 # Wait
+    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CTRL_offset"]+0xFF,       0x1BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg,   HOPTS["DMA_offset"]+0x38,        0x3BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x30,       0x2BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x1000,     0x2BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CORE_offset"]+0xF_0000,   0x4BAD_ADD2)    # Unmapped regions
+
+    # Create & organize output matrices
+    # ----------------------------------
+
+    Input_Matrix = np.zeros((N_VECTORS, 5), dtype=np.uint64)
+    Output_Matrix = np.zeros((N_VECTORS, 2), dtype=np.uint64)
+    
+    DRAM_mem = np.zeros(1000, dtype=np.uint8)
+    DRAM_mem_gold = np.zeros(1000, dtype=np.uint8)
+
+    Input_Matrix[:,0] = dh.convert_to_intN(cfg_data_in, HOPTS['CFG_AXI_DATA_WIDTH'])
+    Input_Matrix[:,1] = dh.convert_to_intN(cfg_address, HOPTS['CFG_AXI_ADDR_WIDTH'])
+    Input_Matrix[:,2] = cfg_wren
+    Input_Matrix[:,3] = cfg_rden
+    Input_Matrix[:,4] = cfg_waitflag
+
+    Output_Matrix[:,0] = cfg_data_out
+    Output_Matrix[:,1] = cfg_checkflag
+
+    # Save output matrices
+    # ----------------------------------
+
+    # Select folder depending on the test
+    folder = "../test/stimuli/debug_test/"
+
+    # Save matrices
+    np.savetxt(folder+"GoldenStimuli.txt", Input_Matrix, fmt='%01X', delimiter=' ')
+    np.savetxt(folder+"GoldenOutputs.txt", Output_Matrix, fmt='%01X', delimiter=' ')
+    np.savetxt(folder+"initial_dram.txt", DRAM_mem, fmt='%01X', delimiter=' ')
+    np.savetxt(folder+"gold_dram.txt", DRAM_mem_gold, fmt='%01X', delimiter=' ')
+    
+    # Generate and save test config file
+    testcfg_list = []
+    testcfg_list.insert(0, 1)
+    testcfg_list.insert(0, 1)
+    
+    np.savetxt(folder+"tstcfg.txt", np.array(testcfg_list), fmt='%01X', delimiter=' ')
+
+
+# -----------------------------------
+# TILEINFO FOR SINGLE TILE TESTS
+# -----------------------------------
+
+def get_single_tile_info(TESTS):
+    TILEINFO = [
+        TESTS[4],    # c_til = C_in
+        TESTS[7],    # k_til = C_out
+        TESTS[6],    # h_til = Ch
+        TESTS[5],    # w_til = Cw
+    ]
+    return TILEINFO
+
 # ------------------------------
 # TEST GENERATION
 # ------------------------------
 
-def generate_tests():
+def generate_tests(TOPTS, HOPTS):
     
-    TILEINFO = []
-    LIMITS = get_conv_limits()
+    LIMITS = get_conv_limits(HOPTS)
     
     # Power test => Only two small convolutions
     if (TOPTS['test_type']=='power_estimation'):
         TESTS = gen_power_tests(HOPTS['X'], HOPTS['Y'])
+        TILEINFO = get_single_tile_info(TESTS)
                 
     # Small benchmark test
     elif (TOPTS['test_type']=='bmk_small'):
@@ -694,347 +690,15 @@ def generate_tests():
         sram_sizes = [HOPTS['MEMA_size'], HOPTS['MEMB_size'], HOPTS['MEMC_size']]
         gen_random_tests(LIMITS, sram_sizes, TESTS, HOPTS['X'], HOPTS['Y'], HOPTS['DILP_W'], HOPTS['PARAMS_W'], 70)
     
+        TILEINFO = get_single_tile_info(TESTS)
+
     # Debug test (uses alternative flow, parameters ignored)
     elif (TOPTS['test_type']=='debug_test'):
         TESTS = [[1]]
+        TILEINFO = [[1]]
 
     # Unrecognized test type (error)
     else:
         assert 0, 'Could not recognize test_type = "{}"'.format(TOPTS['test_type'])
 
     return TESTS, TILEINFO, LIMITS
-
-# --------------------------------
-# Get systolic array dict
-# --------------------------------
-
-def get_sa_dict():
-    
-    SA_Param_dict = {
-    
-        'array_type' : 'OS'                 , # 'WS' or 'OS
-        'OS_buff_K' : 1                     , # Number of internal buffers (K)
-        
-        'size_Y' : HOPTS['Y']                        , # Y size of the array
-        'size_X' : HOPTS['X']                        , # X size of the array (irrelevant in this case)
-    
-        'ACT_IA_W' : HOPTS['IA_W'],
-        'WEI_IB_W' : HOPTS['IB_W'],
-        'ACT_SRAMA_W' : HOPTS['MEMA_W'],
-        'WEI_SRAMB_W' : HOPTS['MEMB_W'],
-        'ACT_WOFS_W' : HOPTS['IFM_WOFS_W'],
-        'WEI_WOFS_W' : HOPTS['WEI_WOFS_W'],
-        'ACY_FIFO_POSITIONS' : HOPTS['IFM_FIFO_POSITIONS'],
-        'WEI_FIFO_POSITIONS' : HOPTS['WEI_FIFO_POSITIONS'],
-        'FIFO_FILL_CYCLES' : HOPTS['FIFO_FILL_CYCLES'],
-    
-        'name' : "SA Parameter Dictionary"
-    }
-    
-    return SA_Param_dict
-
-# ------------------------------
-# GET CURRENT CONVOLUTION DICT
-# ------------------------------
-
-def get_conv_dict(idx, TESTS, TILEINFO=[], check_mem_size=True, silent=False):
-    
-    B_w =           TESTS[0][idx]
-    B_h =           TESTS[1][idx]
-    d =             TESTS[2][idx]
-    s =             TESTS[3][idx]
-    c =             TESTS[4][idx]
-    C_w =           TESTS[5][idx]
-    C_h =           TESTS[6][idx]
-    C_c =           TESTS[7][idx]
-    X_used =        TESTS[8][idx]
-    Y_used =        TESTS[9][idx]
-    preload_en =    TESTS[10][idx]
-
-    AB_c = c
-   
-    if (TOPTS['test_type'] in ['bmk_small','bmk_torture']):
-        c_til =     TILEINFO[0][idx]
-        k_til =     TILEINFO[1][idx]
-        h_til =     TILEINFO[2][idx]
-        w_til =     TILEINFO[3][idx]
-    else:
-        c_til =     c
-        k_til =     C_c
-        h_til =     C_h
-        w_til =     C_w
-   
-    if not silent:
-        print("Test number {}".format(idx+1))
-        print("Bw={}, Bh={}, AB_c={}, C_w={}, C_h={}, C_c={}, s={}, d={}, Xu={}, Yu={}".format(B_w, B_h, AB_c, C_w, C_h, C_c, s, d, X_used, Y_used))
-        print("------------------------------------------------------------")
-        
-    # Derived constants
-    # --------------------------------------------------------------------------
-    
-    # Internal tiles for SAURIA execution
-    X_tiles = int(w_til//Y_used)
-    Y_tiles = int(h_til)
-    K_tiles = int(k_til//X_used)
-    
-    # Number of context switches
-    N_cswitch = X_tiles*Y_tiles*K_tiles    
-        
-    # Effective kernel size (receptive field)
-    B_w_eff = 1 + (B_w - 1)*d
-    B_h_eff = 1 + (B_h - 1)*d
-    
-    # Effective output size - How much the output center pixels over the Activations
-    C_w_eff = 1 + (C_w - 1)*s
-    C_h_eff = 1 + (C_h - 1)*s
-    
-    # Activation size - Effective output size bounded by the effective kernel size
-    A_w = C_w_eff + B_w_eff - 1
-    A_h = C_h_eff + B_h_eff - 1
-    A_c = AB_c
-        
-    if (TOPTS['test_type'] in ['bmk_small','bmk_torture']):
-        C_w_eff_til = 1 + (w_til - 1)*s
-        C_h_eff_til = 1 + (h_til - 1)*s
-        
-        A_w_til = C_w_eff_til + B_w_eff - 1
-        A_h_til = C_h_eff_til + B_h_eff - 1
-    else:
-        A_w_til = A_w
-        A_h_til = A_h
-    
-    # Memory size check
-    # --------------------------------------------------------------------------
-    
-    if (check_mem_size):
-    
-        if not (TOPTS['test_type'] in ['bmk_small','bmk_torture']):
-            N_As = A_w*A_h*AB_c
-            N_Bs = B_w*B_h*AB_c*C_c
-            N_Cs = C_w*C_h*C_c
-        
-        else:
-            N_As = A_w_til*A_h_til*c_til
-            N_Bs = B_w*B_h*c_til*k_til
-            N_Cs = w_til*h_til*k_til
-            
-        assert N_As <= HOPTS['MEMA_size'], "Activations do not fit in Memory! {}/{}".format(N_As, HOPTS['MEMA_size'])
-        assert N_Bs <= HOPTS['MEMB_size'], "Weights do not fit in Memory! {}/{}".format(N_Bs, HOPTS['MEMB_size'])
-        assert N_Cs <= HOPTS['MEMC_size'], "Outputs do not fit in Memory! {}/{}".format(N_Cs, HOPTS['MEMC_size'])
-    
-    # Derived config parameters
-    # ---------------------------------------------------------------------------------------
-    
-    # Threshold fix to zero (for now...)
-    thres = 0
-        
-    # Dilation pattern generation
-    Dil_str = '0b'
-    for i in range(HOPTS['DILP_W']):
-        
-        if (i%d == 0) and (i//d < B_w):
-            Dil_str = Dil_str + '1'
-        else:
-            Dil_str = Dil_str + '0'
-
-    Dil_pat = int(Dil_str, 2)
-    
-    # Row & column masks generation
-    rows_active_str = '0b'
-    rows_active_arr = np.zeros(HOPTS['Y'], dtype=np.bool)
-    cols_active_str = '0b'
-    cols_active_arr = np.zeros(HOPTS['X'], dtype=np.bool)
-    
-    for j in range(HOPTS['Y']):
-        if (j<Y_used):
-            rows_active_str = rows_active_str + '1'
-            rows_active_arr[j] = 1
-        else:
-            rows_active_str = rows_active_str + '0'
-            
-    for i in range(HOPTS['X']):
-        if (i<X_used):
-            cols_active_str = cols_active_str + '1'
-            cols_active_arr[i] = 1
-        else:
-            cols_active_str = cols_active_str + '0'
-    
-    rows_active = int(rows_active_str, 2)
-    cols_active = int(cols_active_str, 2)
-    
-    # Local woffs
-    lwoffs = rows_active_arr*np.arange(HOPTS['Y'])*s
-    
-    CONV = {
-        "B_w" : B_w,
-        "B_h" : B_h,
-        "C_w" : C_w,
-        "C_h" : C_h,
-        "C_c" : C_c,
-        "A_w" : A_w,
-        "A_h" : A_h,
-        "A_c" : A_c,
-        "AB_c" : AB_c,
-        "d" : d,
-        "s" : s,
-        
-        "w_til" : w_til,
-        "h_til" : h_til,
-        "c_til" : c_til,
-        "k_til" : k_til,
-        "A_w_til" : A_w_til,
-        "A_h_til" : A_h_til,
-        
-        "B_w_eff" : B_w_eff,
-        "B_h_eff" : B_h_eff,
-        
-        "X_tiles" : X_tiles,
-        "Y_tiles" : Y_tiles,
-        "K_tiles" : K_tiles,
-        "N_cswitch" : N_cswitch,
-        
-        "X_used" : X_used,
-        "Y_used" : Y_used,
-        "preload_en" : preload_en,
-        
-        "Dil_pat" : Dil_pat,
-        "rows_active" : rows_active,
-        "cols_active" : cols_active,
-        "lwoffs" : lwoffs,
-        "thres" : thres
-        }
-    
-    return CONV
-
-# ------------------------------
-# UPDATE TESTCFG
-# ------------------------------
-
-def testcfg_update(testcfg_list, dram_offset, dram_region_len, CONV):
-
-    c_til_iter = int(CONV['AB_c']/CONV['c_til'])
-    k_til_iter = int(CONV['C_c']/CONV['k_til'])
-    w_til_iter = int(CONV['C_w']/CONV['w_til'])
-    h_til_iter = int(CONV['C_h']/CONV['h_til'])
-    
-    total_iter = c_til_iter*k_til_iter*w_til_iter*h_til_iter
-    
-    testcfg_list.append(total_iter)
-    testcfg_list.append(dram_offset)
-    testcfg_list.append(dram_offset+dram_region_len-1)
-
-# ------------------------------
-# GENERATE OUTPUT FILES
-# ------------------------------
-
-def generate_test_outputs(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, N_tests):
-    
-    N_VECTORS = 50*N_tests
-            
-    # Fill config arrays
-    # ----------------------------------
-    cfg_address, cfg_data_in, cfg_wren, cfg_rden, cfg_waitflag, cfg_checkflag, cfg_data_out = generate_controller_cmds(controller_regs, N_VECTORS)
-
-    # Create & organize output matrices
-    # ----------------------------------
-    
-    Input_Matrix = np.zeros((N_VECTORS, 5), dtype=np.uint64)
-    Output_Matrix = np.zeros((N_VECTORS, 2), dtype=np.uint64)
-    
-    Input_Matrix[:,0] = dsth.convert_to_intN(cfg_data_in, HOPTS['CFG_AXI_DATA_WIDTH'])
-    Input_Matrix[:,1] = dsth.convert_to_intN(cfg_address, HOPTS['CFG_AXI_ADDR_WIDTH'])
-    Input_Matrix[:,2] = cfg_wren
-    Input_Matrix[:,3] = cfg_rden
-    Input_Matrix[:,4] = cfg_waitflag
-
-    Output_Matrix[:,0] = cfg_data_out
-    Output_Matrix[:,1] = cfg_checkflag
-        
-    # Save output matrices
-    # ----------------------------------
-
-    # Append string to add to file names (mark approximate values)
-    app_str = "" if not HOPTS['approx_comp'] else "_approx"
-
-    # Select folder depending on the test
-    if (TOPTS['test_type'] == 'bmk_small'):
-        folder = "../test/stimuli/bmk_small/"
-    elif (TOPTS['test_type'] == 'bmk_torture'):
-        folder = "../test/stimuli/bmk_torture/"
-    else:
-        folder = "../test/stimuli/conv_validation/"
-
-    # Save matrices
-    np.savetxt(folder+"GoldenStimuli"+app_str+".txt", Input_Matrix, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"GoldenOutputs"+app_str+".txt", Output_Matrix, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"initial_dram"+app_str+".txt", DRAM_mem, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"gold_dram"+app_str+".txt", DRAM_mem_gold, fmt='%01X', delimiter=' ')
-    
-    # Generate and save test config file
-    N_total = np.sum(testcfg_list[::3])
-    testcfg_list.insert(0,N_total)
-    testcfg_list.insert(0, N_tests)
-    
-    np.savetxt(folder+"tstcfg"+app_str+".txt", np.array(testcfg_list), fmt='%01X', delimiter=' ')
-
-def generate_controller_cmds(controller_regs, N_VECTORS):
-
-    picos_regs_array = np.array(controller_regs, dtype=np.uint64).astype(np.int64)
-
-    # Split 64-bit picos regs into 32-bit DMA controller config words
-    dmactrl_regs_array = np.zeros([picos_regs_array.shape[0],2*picos_regs_array.shape[1]], np.int64)
-
-    dmactrl_regs_array[:,0::2] = picos_regs_array & 0xFFFFFFFF
-    dmactrl_regs_array[:,1::2] = (picos_regs_array >> 32) & 0xFFFFFFFF
-
-    # Create control words
-    cfg_address = np.zeros((N_VECTORS), dtype=np.uint32)
-    cfg_data_in = np.zeros((N_VECTORS), dtype=np.uint64)
-    cfg_wren = np.zeros((N_VECTORS), dtype=np.uint32)
-    cfg_rden = np.zeros((N_VECTORS), dtype=np.uint32)
-    cfg_waitflag = np.zeros((N_VECTORS), dtype=np.uint32)
-    
-    cfg_checkflag = np.zeros((N_VECTORS), dtype=np.uint32)
-    cfg_data_out = np.zeros((N_VECTORS), dtype=np.uint64)
-
-    offs = HOPTS['CTRL_offset']
-
-    idx=0
-
-    # Enable interrupts initially
-    cfg_address[idx] =    HOPTS['CTRL_offset']+0x8
-    cfg_data_in[idx] =    3
-    cfg_wren[idx] =       1
-    idx+=1
-
-    for test_regs in dmactrl_regs_array:
-        # Write cfg registers
-        for i, reg in enumerate(test_regs):
-            cfg_address[idx] =    offs+0x10+(i<<2)
-            cfg_data_in[idx] =    reg
-            cfg_wren[idx] =       1
-            idx+=1
-
-        # Start control FSM
-        cfg_address[idx] =    HOPTS['CTRL_offset']+0x0
-        cfg_data_in[idx] =    3
-        cfg_wren[idx] =       1
-        idx+=1
-
-        # Wait for completion
-        cfg_waitflag[idx] =   1
-        idx+=1
-
-        # Lower interrupts
-        cfg_address[idx] =    HOPTS['CTRL_offset']+0xC
-        cfg_data_in[idx] =    3
-        cfg_wren[idx] =       1
-        idx+=1
-
-        # Check flag
-        cfg_checkflag[idx] =  1
-        idx+=2
-
-
-    return cfg_address, cfg_data_in, cfg_wren, cfg_rden, cfg_waitflag, cfg_checkflag, cfg_data_out
-

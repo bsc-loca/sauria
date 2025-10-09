@@ -35,29 +35,17 @@ cd tools/
 source install_verilator.sh
 ```
 
-To use the Python script that generates random stimuli for the simulations, install the required packages into your Python environment by using pip:
-
-```bash
-pip install -r Python/requirements_pip.txt
-```
-
-Or, alternatively, using Conda:
-
-```bash
-conda install --file Python/requirements_pip.txt
-```
-
-The option to set up a Python virtual environment is also available:
+To install the virtual Python environment with all required dependencies, run:
 
 ```bash
 source setup.sh
-cd Python
+cd Python/
 source install_venv.sh
 ```
 
 ## Running Simulations
 
-First, we generate a set of random convolutions and GEMMs using Python:
+<!-- First, we generate a set of random convolutions and GEMMs using Python:
 
 ```bash
 source setup.sh
@@ -77,8 +65,14 @@ To visualize the waveforms of the simulation we have to generate a VCD dump and 
 
 ```bash
 source run_sauria_test.sh bmk_small vcd
-source display_sauria_waves.sh new_test.vcd gtk_waves/sauria_8x16_fp16.gtkw
+source display_sauria_waves.sh new_test.vcd gtk_waves/sauria_8x16_fp16.gtkw -->
 ```
+
+For VS Code users, to select the virtual environment as your Python interpreter in the Jupyter notebooks, manually add the environment as a Python interpreter:
+1. Ctrl+Shift+P to open the command palette
+2. Look for "Python: Select Interpreter"
+3. Select "Enter interpreter path" and search for: repo_root/Python/sauria-env/bin/python
+
 ## Publication
 
 If you use SAURIA in your work, you can cite the following paper:

@@ -22,8 +22,6 @@ Jordi Fornt <jfornt@bsc.es>
 import numpy as np
 import sys
 
-sys.path.insert(1, './../')
-
 def array_multiplier(a, b, N_bits=16, hbl=3, vbl=3, corr_loc=0, signed=True):
     
     if signed:

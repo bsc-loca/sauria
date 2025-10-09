@@ -1,4 +1,6 @@
 RTL/tb/tb_sauria_top/*.txt
+Python/sauria-env
+Python/env
 __pycache__
 obj_dir
 Test-Sim

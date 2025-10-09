@@ -4,3 +4,19 @@ export PYTHON_DIR=$(pwd)/Python
 export TEST_DIR=$(pwd)/test
 export VERILATOR_ROOT=$(pwd)/tools/verilator
 export PATH=$PATH:$VERILATOR_ROOT/bin
+
+if [ -d "$PYTHON_DIR/sauria-env" ]; then
+    echo "Activating Python virtual environment found in $PYTHON_DIR/sauria-env."
+    source "$PYTHON_DIR/sauria-env/bin/activate"
+else
+    echo "(Only first time after clone) Creating new Python virtual environment in $PYTHON_DIR/sauria-env."
+    cd "$PYTHON_DIR"
+    source install_venv.sh
+fi
+
+# Export environment variables to load with Python
+env > $PYTHON_DIR/env_raw
+
+# Remove everything after "BASH_FUNC_ml" to avoid nasty warnings
+sed -n '/BASH_FUNC_ml*/q;p' $PYTHON_DIR/env_raw > $PYTHON_DIR/env
+rm $PYTHON_DIR/env_raw

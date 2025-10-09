@@ -29,14 +29,16 @@
 // --------------------
 
 `define PRINT_ERRORS
+`define STIMULI_PATH    "../stimuli"
+`define OUTPUTS_PATH    "../outputs"
+`define WRITE_OUTPUTS   1
+`define CHECK_RESULTS   1
 
 module sauria_tester(
     input  logic        rstn_sauria,
     input  logic        clk_sauria,
     input  logic        rstn_sys,
     input  logic        clk_sys,
-
-    input  logic [1:0]  file_opts,       
 
     input  logic [31:0]     cfg_bus_lite_ar_addr,
     input  logic            cfg_bus_lite_ar_valid,
@@ -51,9 +53,9 @@ module sauria_tester(
     input  logic            cfg_bus_lite_w_valid,
     output logic            cfg_bus_lite_w_ready,
 
-    input  logic [7:0]      test_idx,
     input  logic            check_flag,
     input  logic [31:0]     dram_startoffs,
+    input  logic [31:0]     dram_outoffs,
     input  logic [31:0]     dram_endoffs,
     output logic [31:0]     errors,
 
@@ -256,48 +258,8 @@ module sauria_tester(
 
     // Load memories
     initial begin: data_load_check
-        case(file_opts)
-            // 0 = conv_validation
-            0: begin
-                `ifdef APPROXIMATE
-                    $readmemh("../stimuli/conv_validation/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/conv_validation/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
-                `else
-                    $readmemh("../stimuli/conv_validation/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/conv_validation/gold_dram.txt", gold_dram, DRAM_OFFSET);
-                `endif
-            end
-            // 1 = bmk_small
-            1: begin
-                `ifdef APPROXIMATE
-                    $readmemh("../stimuli/bmk_small/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/bmk_small/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
-                `else
-                    $readmemh("../stimuli/bmk_small/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/bmk_small/gold_dram.txt", gold_dram, DRAM_OFFSET);
-                `endif
-            end
-            // 2 = bmk_torture
-            2: begin
-                `ifdef APPROXIMATE
-                    $readmemh("../stimuli/bmk_torture/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/bmk_torture/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
-                `else
-                    $readmemh("../stimuli/bmk_torture/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/bmk_torture/gold_dram.txt", gold_dram, DRAM_OFFSET);
-                `endif
-            end
-            // 3 = debug_test
-            3: begin
-                `ifdef APPROXIMATE
-                    $readmemh("../stimuli/debug_test/initial_dram_approx.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/debug_test/gold_dram_approx.txt", gold_dram, DRAM_OFFSET);
-                `else
-                    $readmemh("../stimuli/debug_test/initial_dram.txt", i_sim_mem_0.mem, DRAM_OFFSET);
-                    $readmemh("../stimuli/debug_test/gold_dram.txt", gold_dram, DRAM_OFFSET);
-                `endif
-            end
-        endcase
+        $readmemh({`STIMULI_PATH,"/initial_dram.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
+        $readmemh({`STIMULI_PATH,"/gold_dram.txt"}, gold_dram, DRAM_OFFSET);
     end
 
     // Check for data mismatches
@@ -345,7 +307,7 @@ module sauria_tester(
                             n_errs += 1;
 
                             `ifdef PRINT_ERRORS
-                            $display("[Test ",test_idx,"] - WRITING mismatch occured at ", $time);
+                            $display("WRITING mismatch occured at ", $time);
                             $displayh("[Address ",k,"] Expected = ", exp_data_out , " but got ", acq_data_out);
                             `endif
                         end
@@ -363,7 +325,7 @@ module sauria_tester(
                                 n_errs += 1;
 
                                 `ifdef PRINT_ERRORS
-                                $display("[Test ",test_idx,"] - WRITING mismatch occured at ", $time);
+                                $display("WRITING mismatch occured at ", $time);
                                 $displayh("Expected o_data_out[",j,"] = ", real_exp , " but got ", real_acq);
                                 $displayh("[Address ",k,"] (Expected word = ", exp_data_out[j*sauria_pkg::OC_W+:sauria_pkg::OC_W] , " but got ", acq_data_out[j*sauria_pkg::OC_W+:sauria_pkg::OC_W], ")");
                                 `endif
@@ -373,6 +335,11 @@ module sauria_tester(
                 end
             end
             n_errs_prev = n_errs;
+
+            // Write output memory contents to a file for analysis
+            if (`WRITE_OUTPUTS == 1)
+                $writememh({`OUTPUTS_PATH,"/test_results.txt"}, i_sim_mem_0.mem, DRAM_OFFSET+dram_outoffs);
+
         end
     end
 

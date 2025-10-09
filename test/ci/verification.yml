@@ -8,9 +8,9 @@ compile:hardware_emu:
         when: never
       - when: always
     script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - cd ${CI_PROJECT_DIR}/tools
         - source install_verilator.sh
-        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - cd ${CI_PROJECT_DIR}/test/verilator
         - source compile_sauria.sh
     artifacts:

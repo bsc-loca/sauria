@@ -23,6 +23,9 @@ import numpy as np
 import sys
 import scipy.stats as stats
 
+import os 
+import subprocess
+
 sys.path.insert(1, './../')
 import src.config_helper as cfg
 import src.data_helper as dh
@@ -511,7 +514,7 @@ def get_conv_limits(HOPTS):
 # Configuration & debug bus test
 # --------------------------------------
 
-def gen_cfg_test(HOPTS):
+def run_cfg_test(HOPTS, assert_no_error=False):
 
     # Max number of vectors
     N_VECTORS = 600
@@ -528,7 +531,7 @@ def gen_cfg_test(HOPTS):
     cfg_checkflag = np.zeros((N_VECTORS), dtype=np.uint32)
     cfg_data_out = np.zeros((N_VECTORS), dtype=np.uint64)
 
-    cfg = [cfg_address, cfg_data_in, cfg_wren, cfg_rden, cfg_waitflag, cfg_checkflag, cfg_data_out]
+    cfg_list = [cfg_address, cfg_data_in, cfg_wren, cfg_rden, cfg_waitflag, cfg_checkflag, cfg_data_out]
 
     # Debug test
     # ----------------------------------
@@ -536,70 +539,69 @@ def gen_cfg_test(HOPTS):
     idx = 0
 
     # ACCESS CONTROLLER REGISTERS
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x0,      0xC000_0000)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CTRL_offset"]+0x0,      0xC000_0000)
     idx+=5 # Wait
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x10,     0xDEAD_BEEF)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x48,     0xBEEF_DEAD)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CTRL_offset"]+0x10,     0xDEAD_BEEF)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CTRL_offset"]+0x48,     0xBEEF_DEAD)
     idx+=5 # Wait
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x10,     0xDEAD_BEEF)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CTRL_offset"]+0x48,     0xBEEF_DEAD)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CTRL_offset"]+0x10,     0xDEAD_BEEF)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CTRL_offset"]+0x48,     0xBEEF_DEAD)
     idx+=50 # Wait
 
     # ACCESS ReDMA REGISTERS
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["DMA_offset"]+0x0,       0x2D00_0000)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["DMA_offset"]+0x0,       0x2D00_0000)
     idx+=5 # Wait
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["DMA_offset"]+0x10,      0xDEAD_BEEF)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["DMA_offset"]+0x30,      0xBEEF_DEAD)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["DMA_offset"]+0x10,      0xDEAD_BEEF)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["DMA_offset"]+0x30,      0xBEEF_DEAD)
     idx+=5 # Wait
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["DMA_offset"]+0x10,      0xDEAD_BEEF)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["DMA_offset"]+0x30,      0xBEEF_DEAD)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["DMA_offset"]+0x10,      0xDEAD_BEEF)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["DMA_offset"]+0x30,      0xBEEF_DEAD)
     idx+=50 # Wait
 
     # ACCESS SAURIA REGISTERS
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+0x0,      0xAC00_000C)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_CON_offset"],    0xDEAD_C201)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_IFM_offset"],    0xDEAD_1F9A)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_WEI_offset"],    0xDEAD_3E16)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_PSM_offset"],    0xDEAD_FE59)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+0x0,      0xAC00_000C)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_CON_offset"],    0xDEAD_C201)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_IFM_offset"],    0xDEAD_1F9A)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_WEI_offset"],    0xDEAD_3E16)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_PSM_offset"],    0xDEAD_FE59)
     idx+=5 # Wait
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_CON_offset"],    0xDEAD_C201)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_IFM_offset"],    0xDEAD_1F9A)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_WEI_offset"],    0xDEAD_3E16)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["CFG_PSM_offset"],    0xDEAD_FE59)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_CON_offset"],    0xDEAD_C201)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_IFM_offset"],    0xDEAD_1F9A)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_WEI_offset"],    0xDEAD_3E16)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["CFG_PSM_offset"],    0xDEAD_FE59)
     idx+=50 # Wait
 
     # ACCESS SAURIA MEMORIES
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMA_offset"]+0x10,     0xDEAD_9E91)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMB_offset"]+0x50,     0xDEAD_9E92)
-    idx = cfg.wr_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMC_offset"]+0x90,     0xDEAD_9E93)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["MEMA_offset"]+0x10,     0xDEAD_9E91)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["MEMB_offset"]+0x50,     0xDEAD_9E92)
+    idx = cfg.wr_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["MEMC_offset"]+0x90,     0xDEAD_9E93)
     idx+=10 # Wait
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMA_offset"]+0x10,     0xDEAD_9E91)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMB_offset"]+0x50,     0xDEAD_9E92)
-    idx = cfg.rd_transaction(idx,cfg, HOPTS["CORE_offset"]+HOPTS["MEMC_offset"]+0x90,     0xDEAD_9E93)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["MEMA_offset"]+0x10,     0xDEAD_9E91)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["MEMB_offset"]+0x50,     0xDEAD_9E92)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CORE_offset"]+HOPTS["MEMC_offset"]+0x90,     0xDEAD_9E93)
     idx+=50 # Wait
 
     # ACCESS UNMAPPED REGIONS
-    idx = cfg.wr_transaction(idx,cfg,   0x3333_3333,    0xDEEE_AAAD)    # Wrong high level mapping
+    idx = cfg.wr_transaction(idx,cfg_list,   0x3333_3333,    0xDEEE_AAAD)    # Wrong high level mapping
     idx+=5 # Wait
-    idx = cfg.rd_transaction(idx,cfg,   0x3333_3333,    0x0BAD_ADD2)    # Wrong high level mapping
+    idx = cfg.rd_transaction(idx,cfg_list,   0x3333_3333,    0x0BAD_ADD2)    # Wrong high level mapping
     idx+=5 # Wait
-    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CTRL_offset"]+0xFF,       0xDEEE_AAAD)    # Unmapped regions
-    idx = cfg.wr_transaction(idx,cfg,   HOPTS["DMA_offset"]+0x38,        0xDEEE_AAAD)    # Unmapped regions
-    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x30,       0xDEEE_AAAD)    # Unmapped regions
-    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x1000,     0xDEEE_AAAD)    # Unmapped regions
-    idx = cfg.wr_transaction(idx,cfg,   HOPTS["CORE_offset"]+0xF_0000,   0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg_list,   HOPTS["CTRL_offset"]+0xFF,       0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg_list,   HOPTS["DMA_offset"]+0x38,        0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0x30,       0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0x1000,     0xDEEE_AAAD)    # Unmapped regions
+    idx = cfg.wr_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0xF_0000,   0xDEEE_AAAD)    # Unmapped regions
     idx+=5 # Wait
-    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CTRL_offset"]+0xFF,       0x1BAD_ADD2)    # Unmapped regions
-    idx = cfg.rd_transaction(idx,cfg,   HOPTS["DMA_offset"]+0x38,        0x3BAD_ADD2)    # Unmapped regions
-    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x30,       0x2BAD_ADD2)    # Unmapped regions
-    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CORE_offset"]+0x1000,     0x2BAD_ADD2)    # Unmapped regions
-    idx = cfg.rd_transaction(idx,cfg,   HOPTS["CORE_offset"]+0xF_0000,   0x4BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CTRL_offset"]+0xFF,       0x1BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["DMA_offset"]+0x38,        0x3BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0x30,       0x2BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0x1000,     0x2BAD_ADD2)    # Unmapped regions
+    idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0xF_0000,   0x4BAD_ADD2)    # Unmapped regions
 
     # Create & organize output matrices
     # ----------------------------------
 
-    Input_Matrix = np.zeros((N_VECTORS, 5), dtype=np.uint64)
-    Output_Matrix = np.zeros((N_VECTORS, 2), dtype=np.uint64)
+    Input_Matrix = np.zeros((N_VECTORS, 7), dtype=np.uint64)
     
     DRAM_mem = np.zeros(1000, dtype=np.uint8)
     DRAM_mem_gold = np.zeros(1000, dtype=np.uint8)
@@ -609,29 +611,38 @@ def gen_cfg_test(HOPTS):
     Input_Matrix[:,2] = cfg_wren
     Input_Matrix[:,3] = cfg_rden
     Input_Matrix[:,4] = cfg_waitflag
-
-    Output_Matrix[:,0] = cfg_data_out
-    Output_Matrix[:,1] = cfg_checkflag
+    Input_Matrix[:,5] = cfg_data_out
+    Input_Matrix[:,6] = cfg_checkflag
 
     # Save output matrices
     # ----------------------------------
 
-    # Select folder depending on the test
-    folder = "../test/stimuli/debug_test/"
+    folder = "../../test/"
 
     # Save matrices
-    np.savetxt(folder+"GoldenStimuli.txt", Input_Matrix, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"GoldenOutputs.txt", Output_Matrix, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"initial_dram.txt", DRAM_mem, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"gold_dram.txt", DRAM_mem_gold, fmt='%01X', delimiter=' ')
+    np.savetxt(folder+"stimuli/GoldenStimuli.txt", Input_Matrix, fmt='%01X', delimiter=' ')
+    np.savetxt(folder+"stimuli/initial_dram.txt", DRAM_mem, fmt='%01X', delimiter=' ')
+    np.savetxt(folder+"stimuli/gold_dram.txt", DRAM_mem_gold, fmt='%01X', delimiter=' ')
     
-    # Generate and save test config file
-    testcfg_list = []
-    testcfg_list.insert(0, 1)
-    testcfg_list.insert(0, 1)
-    
-    np.savetxt(folder+"tstcfg.txt", np.array(testcfg_list), fmt='%01X', delimiter=' ')
+    # Generate and save (dummy) test config file
+    testcfg_list = [1,1,1]
+    np.savetxt(folder+"stimuli/tstcfg.txt", np.array(testcfg_list), fmt='%01X', delimiter=' ')
 
+    # Execute the simulation in Verilator
+    cwd = os.getcwd()
+    os.chdir(folder+"verilator")
+    subprocess.call(["./Test-Sim","+check_read_values"])
+    os.chdir(cwd)
+
+    # Test outputs now look different, however, the last value is always the number of errors
+    stats_outputs = np.loadtxt(folder+"outputs/test_stats.txt", dtype=int)
+    n_errors = stats_outputs[-1]
+
+    if n_errors==0:
+        print("TEST PASSED! :)")
+    else:
+        print("TEST FAILED! :(")
+        if assert_no_error: assert n_errors==0, "FAILED - THERE WERE ERRORS IN THE TEST!"
 
 # -----------------------------------
 # TILEINFO FOR SINGLE TILE TESTS

@@ -2,7 +2,7 @@
 
 SAURIA is a Convolutional Neural Network (CNN) accelerator based on an output stationary (OS) systolic array with on-chip, on-the-fly convolution lowering, written entirely in SystemVerilog. 
 
-The accelerator can natively compute convolution and general matrix-matrix multiplication (GEMM) operations of any shape and size. The architecture is parametric and can be configured to use different systolic array shapes and sizes, local memory shapes, and arithmetic formats, but it has been tested extensively using FP16 arithmetic and an array of shape 8x16.
+The accelerator can natively compute convolution and general matrix-matrix multiplication (GEMM) operations of any shape and size. The architecture is parametric and can be configured to use different systolic array shapes and sizes, local memory shapes, and arithmetic formats, but it has been tested extensively using FP16 arithmetic and an array of shape 8x16 (128 PEs).
 
 Maintainer: Jordi Fornt Mas (jordi.fornt@bsc.es)
 
@@ -42,7 +42,7 @@ source install_verilator.sh
 
 ## Running Simulations
 
-We provide an example Jupyter Notebook explaining step by step how to perform simulations with the repo, which you can find [here](Python/notebooks/example_basic.ipynb)(`Python/notebooks/example_basic.ipynb`).
+We provide an example Jupyter Notebook explaining step by step how to perform simulations with the repo, which you can find [here](Python/notebooks/example_basic.ipynb) (`Python/notebooks/example_basic.ipynb`).
 
 ## Publication
 

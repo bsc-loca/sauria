@@ -1,10 +1,3 @@
-export RTL_DIR=$(pwd)/RTL
-export PULP_DIR=$(pwd)/pulp_platform
-export PYTHON_DIR=$(pwd)/Python
-export TEST_DIR=$(pwd)/test
-export VERILATOR_ROOT=$(pwd)/tools/verilator
-export PATH=$PATH:$VERILATOR_ROOT/bin
-
 if [ -d "$PYTHON_DIR/sauria-env" ]; then
     echo "Activating Python virtual environment found in $PYTHON_DIR/sauria-env."
     source "$PYTHON_DIR/sauria-env/bin/activate"
@@ -20,3 +13,10 @@ env > $PYTHON_DIR/env_raw
 # Remove everything after "BASH_FUNC_ml" to avoid nasty warnings
 sed -n '/BASH_FUNC_ml*/q;p' $PYTHON_DIR/env_raw > $PYTHON_DIR/env
 rm $PYTHON_DIR/env_raw
+
+export RTL_DIR=$(pwd)/RTL
+export PULP_DIR=$(pwd)/pulp_platform
+export PYTHON_DIR=$(pwd)/Python
+export TEST_DIR=$(pwd)/test
+export VERILATOR_ROOT=$(pwd)/tools/verilator
+export PATH="$VERILATOR_ROOT/bin:$PATH"

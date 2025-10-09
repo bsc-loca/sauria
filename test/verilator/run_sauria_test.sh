@@ -10,4 +10,4 @@ else
     VCD_OPTS="+vcd +vcd_name=$VCD_NAME +start_vcd_time=$VCD_START_TIME"
 fi
 
-./Test-Sim $TEST_TYPE +max-cycles=$MAX_CYCLES $VCD_OPTS
+./Test-Sim +max-cycles=$MAX_CYCLES $VCD_OPTS

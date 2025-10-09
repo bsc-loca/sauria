@@ -250,7 +250,7 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     
     # Execute the simulation in Verilator
     cwd = os.getcwd()
-    os.chdir("/users/jfornt/new_sauria/sauria/test/verilator")
+    os.chdir("../../test/verilator")
     f1 = open("verilator_run.log","w")
     if generate_vcd:
         subprocess.call(["sh","./run_sauria_test.sh", "new.vcd"],stdout=f1)

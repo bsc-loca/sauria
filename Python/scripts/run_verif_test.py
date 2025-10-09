@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 Copyright 2023 Barcelona Supercomputing Center (BSC)
 SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
@@ -103,8 +104,7 @@ if __name__ == "__main__":
 
     # Debug test is special, we don't use the normal flow
     if (TOPTS['test_type']=='debug_test'):
-        th.gen_cfg_test(HW_PARAMS)
-        # FIXME! Integrate in regular flow!
+        th.run_cfg_test(HW_PARAMS, TOPTS['assert_no_errors'])
 
     # Normal convolution tests
     else:

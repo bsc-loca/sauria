@@ -33,10 +33,8 @@ using std::vector;
 
 using namespace std;
 
-//#define VERBOSE
-
 uint64_t main_time = 0;
-uint64_t max_time = 0;
+uint64_t max_time = 10000;
 uint64_t start_vcd_time = 0;
 unsigned int exit_delay = 0;
 unsigned int exit_code = 0;
@@ -45,15 +43,6 @@ unsigned int exit_code = 0;
 void print_help(){
 
     std::cout << "SAURIA Verilator simulation flags: "<< std::endl << std::endl;
-
-    std::cout << "conv_validation (default)"<< std::endl;
-    std::cout << "\t Simulates 100 different single convolution workloads of different tensor shapes, kernel size, strides and dilation coefficient."<< std::endl << std::endl;
-
-    std::cout << "bmk_small"<< std::endl;
-    std::cout << "\t Simulates 4 different convolutions that do not fit in the SAURIA memories, with tiling."<< std::endl << std::endl;
-
-    std::cout << "bmk_torture"<< std::endl;
-    std::cout << "\t Simulates 40 different convolutions that do not fit in the SAURIA memories, with tiling."<< std::endl << std::endl;
 
     std::cout << "+max-cycles="<< std::endl;
     std::cout << "\tSets the maximum cycles of the simulation."<< std::endl << std::endl;
@@ -66,6 +55,13 @@ void print_help(){
     
     std::cout << "+vcd_name="<< std::endl;
     std::cout << "\tSets the output file of the vcd trace"<< std::endl << std::endl;
+
+    std::cout << "+check_read_values"<< std::endl;
+    std::cout << "\tChecks that values read from the config interface are equal to the golden ones from the stimuli."<< std::endl << std::endl;
+
+    std::cout << "+debug"<< std::endl;
+    std::cout << "\tPrint additional debug information."<< std::endl << std::endl;
+
 }
 
 // WRITE DATA TO CFG AXI
@@ -140,7 +136,8 @@ int main(int argc, char** argv, char** env) {
     int dma_status = 3;
     int cfg_status = 3;
     bool read_in_progress = 0;
-    bool debug = true;
+    bool debug = false;
+    bool check_read_values = false;
 
     uint32_t cfg_data_in, cfg_addr;
     bool cfg_wren, cfg_rden, cfg_wait4sauria;
@@ -175,7 +172,10 @@ int main(int argc, char** argv, char** env) {
         else if(it->find("+out_path=") == 0) {
             out_path = it->substr(strlen("+out_path="));
         }
-        else if(it->find("+debug=") == 0) {
+        else if(*it == "+check_read_values") {
+            check_read_values = true;
+        }
+        else if(*it == "+debug") {
             debug = true;
         }
         else {
@@ -220,6 +220,8 @@ int main(int argc, char** argv, char** env) {
 
     cntFile0.close();
 
+    if (debug)  std::cout<<"Test config file " << filename << " has "<< N_LINES_TST << " lines.\n";
+
     TestFile.open(filename);
     if (!TestFile.is_open()) {
         cout<<"Error opening file: "<< filename << " \n";
@@ -253,9 +255,11 @@ int main(int argc, char** argv, char** env) {
 
     cntFile1.close();
 
+    if (debug)  std::cout<<"Stimuli file " << filename << " has "<< N_LINES_STIM << " lines.\n";
+
     StimFile.open(filename);
     if (!StimFile.is_open()) {
-        cout<<"Error opening file: "<< filename << " \n";
+        std::cout<<"Error opening file: "<< filename << " \n";
         return 1;
     }
 
@@ -332,18 +336,13 @@ int main(int argc, char** argv, char** env) {
                 if (cfg_wait4sauria) {
                     if (top->ctrl_interrupt){
                         cfg_wait4sauria=0;
-                        #ifdef VERBOSE
-                        std::cout << "[" << main_time << "] New test " << std::endl;
-                        #endif
+                        if (debug) std::cout << "[" << main_time << "] New test " << std::endl;
                     }
 
                 // Lowering SAURIA interrupt flag
                 } else if (lower_intr_flag) {
 
-                    #ifdef VERBOSE
-                    std::cout << "[" << main_time << "] [CFG] Lowering SAURIA interrupt... " << (int)(top->ctrl_interrupt) << std::endl;
-                    #endif
-
+                    if (debug) std::cout << "[" << main_time << "] [CFG] Lowering SAURIA interrupt... " << (int)(top->ctrl_interrupt) << std::endl;
                     if (cfg_status==3) {
                         cfg_req_write(top, 0xC, 0xF);
                         cfg_status = 0;
@@ -363,23 +362,16 @@ int main(int argc, char** argv, char** env) {
                     cfg_wren =      StimuliArray[7*idx_cfg+2];
                     cfg_rden =      StimuliArray[7*idx_cfg+3];
 
-                    #ifdef VERBOSE
-                    std::cout << "[" << main_time << "] CFG idx " << idx_cfg << std::endl;
-                    //std::cout << "Controller interrupt... " << (int)(top->ctrl_interrupt) << std::endl;
-                    #endif
+                    if (debug) std::cout << "[" << main_time << "] CFG idx " << idx_cfg << std::endl;
 
                     switch (StimuliArray[7*idx_cfg+4]) {
                         case 1:
                             cfg_wait4sauria = 1;
-                            #ifdef VERBOSE
-                            std::cout << "[" << main_time << "] [CFG] Waiting 4 sauria..." << std::endl;
-                            #endif
+                            if (debug) std::cout << "[" << main_time << "] [CFG] Waiting 4 sauria..." << std::endl;
                             break;
                         case 2:
                             cfg_wait4sauria = 0;
-                            #ifdef VERBOSE
-                            std::cout << "[" << main_time << "] [CFG] Waiting 4 other IF..." << std::endl;
-                            #endif
+                            if (debug) std::cout << "[" << main_time << "] [CFG] Waiting 4 other IF..." << std::endl;
                             break;
                         default:
                             cfg_wait4sauria = 0;
@@ -418,10 +410,10 @@ int main(int argc, char** argv, char** env) {
                                 idx_cfg++;
                                 read_in_progress = 0;
 
-                                // if (expected_rd != rd_databuf) {
-                                //     total_errors+=1;
-                                //     std::cout << "Error! Expected " << std::hex << expected_rd << std::dec << std::endl;
-                                // }
+                                if (check_read_values && (expected_rd != rd_databuf)) {
+                                    total_errors+=1;
+                                    std::cout << "Error! Expected " << std::hex << expected_rd << std::dec << std::endl;
+                                }
 
                                 // Save read contents to statsFile
                                 statsFile << rd_databuf << std::endl;
@@ -472,8 +464,10 @@ int main(int argc, char** argv, char** env) {
 
             total_errors+=top->errors;
 
-            // END OF TEST
-            done = 1;
+            // END OF TEST, Except debug_test
+            if (!check_read_values){
+                done = 1;
+            }
 
         } else {
             top->check_flag = 0;    

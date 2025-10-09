@@ -17,80 +17,10 @@ compile:hardware_emu:
             - ${CI_PROJECT_DIR}/test/verilator/verilator.log
             - ${CI_PROJECT_DIR}/test/verilator/Test-Sim
 
-stim_gen:debug_test:
-    stage: stim_gen
-    extends: .simulation
-    tags:
-        - dv
-    rules:
-      - if: '$CI_SKIP_SIMULATION == "true"'
-        when: never
-      - when: on_success
-    script:
-        - cd ${CI_PROJECT_DIR}/Python
-        - pip install -r requirements_pip.txt
-        - source generate_stimuli.sh debug_test
-    artifacts:
-        expire_in: 1 weeks
-        when: on_success
-        paths:
-            - ${CI_PROJECT_DIR}/test/stimuli/debug_test/gold_dram.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/debug_test/initial_dram.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/debug_test/GoldenStimuli.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/debug_test/GoldenOutputs.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/debug_test/tstcfg.txt
-
-stim_gen:small_bmk:
-    stage: stim_gen
-    extends: .simulation
-    tags:
-        - dv
-    rules:
-      - if: '$CI_SKIP_SIMULATION == "true"'
-        when: never
-      - when: on_success
-    script:
-        - cd ${CI_PROJECT_DIR}/Python
-        - pip install -r requirements_pip.txt
-        - source generate_stimuli.sh bmk_small
-    artifacts:
-        expire_in: 1 weeks
-        when: on_success
-        paths:
-            - ${CI_PROJECT_DIR}/test/stimuli/bmk_small/gold_dram.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/bmk_small/initial_dram.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/bmk_small/GoldenStimuli.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/bmk_small/GoldenOutputs.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/bmk_small/tstcfg.txt
-
-stim_gen:conv_validation:
-    stage: stim_gen
-    extends: .simulation
-    tags:
-        - dv
-    rules:
-      - if: '$CI_SKIP_SIMULATION == "true"'
-        when: never
-      - when: on_success
-    script:
-        - cd ${CI_PROJECT_DIR}/Python
-        - pip install -r requirements_pip.txt
-        - source generate_stimuli.sh conv_validation
-    artifacts:
-        expire_in: 1 weeks
-        when: on_success
-        paths:
-            - ${CI_PROJECT_DIR}/test/stimuli/conv_validation/gold_dram.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/conv_validation/initial_dram.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/conv_validation/GoldenStimuli.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/conv_validation/GoldenOutputs.txt
-            - ${CI_PROJECT_DIR}/test/stimuli/conv_validation/tstcfg.txt
-
 test:debug_test:
     stage: test
     dependencies:
       - compile:hardware_emu
-      - stim_gen:debug_test
     extends: .simulation
     tags:
         - dv
@@ -99,14 +29,15 @@ test:debug_test:
         when: never
       - when: on_success
     script:
-        - cd ${CI_PROJECT_DIR}/test/verilator
-        - source run_sauria_test.sh debug_test
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
+        - cd scripts
+        - python run_verif_test.py --test_type debug_test --assert_no_errors
 
-test:small_bmk:
+test:bmk_small:
     stage: test
     dependencies:
       - compile:hardware_emu
-      - stim_gen:small_bmk
     extends: .simulation
     tags:
         - dv
@@ -115,14 +46,15 @@ test:small_bmk:
         when: never
       - when: on_success
     script:
-        - cd ${CI_PROJECT_DIR}/test/verilator
-        - source run_sauria_test.sh bmk_small
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
+        - cd scripts
+        - python run_verif_test.py --test_type bmk_small --assert_no_errors
 
 test:conv_validation:
     stage: test
     dependencies:
       - compile:hardware_emu
-      - stim_gen:conv_validation
     extends: .simulation
     tags:
         - dv
@@ -131,5 +63,7 @@ test:conv_validation:
         when: never
       - when: on_success
     script:
-        - cd ${CI_PROJECT_DIR}/test/verilator
-        - source run_sauria_test.sh conv_validation
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
+        - cd scripts
+        - python run_verif_test.py --test_type conv_validation --assert_no_errors

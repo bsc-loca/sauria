@@ -9,6 +9,8 @@ compile:hardware_emu:
       - when: always
     script:
         - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
         - cd ${CI_PROJECT_DIR}/tools
         - source install_verilator.sh
         - cd ${CI_PROJECT_DIR}/test/verilator

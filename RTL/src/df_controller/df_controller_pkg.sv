@@ -34,8 +34,8 @@ package df_ctrl_pkg;
     } IFmapsTilePointer;
 
     typedef struct {
-        logic [11:0] k_step;
-        logic [23:0] c_step;
+        logic [19:0] k_step;
+        logic [15:0] c_step;
     } WeightsTilePointer;
 
     typedef struct {

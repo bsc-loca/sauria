@@ -108,6 +108,7 @@ module sauria_interface #(
     reg Cw_eq;
     reg Ch_eq;
     reg Ck_eq;
+    reg WXfer_op;
 
     assign sauria_axilite.arvalid = 1'b0;
     assign sauria_axilite.araddr = 32'd0;
@@ -229,10 +230,14 @@ module sauria_interface #(
         start_wresp_sync <= 1'b0;
         start_dma_controller <= 1'b0;
 
-        dma_params.dma.psums.k_lim <= dma_params.tile.weights.k_step - 12'd1;
-        dma_params.dma.psums.y_lim <= dma_params.tile.psums.y_step - {12'd0, dma_params.dma.psums.y_step};
-        dma_params.dma.weights.w_lim <= dma_params.tile.weights.c_step - {12'd0, dma_params.dma.weights.w_step};
+//        dma_params.dma.psums.k_lim <= dma_params.tile.weights.k_step - 12'd1;
+//        dma_params.dma.psums.y_lim <= dma_params.tile.psums.y_step - {12'd0, dma_params.dma.psums.y_step};
+//        dma_params.dma.weights.w_lim <= dma_params.tile.weights.c_step - {12'd0, dma_params.dma.weights.w_step};
 
+        dma_params.dma.psums.k_lim <= (WXfer_op == 1'b1) ? (dma_params.dma.weights.w_step - 12'd1) : (dma_params.tile.weights.k_step - 12'd1);  // ETIL_W_WSTEP = Cout -> Becomes an auxiliary register to not mess up PSUMS
+        dma_params.dma.psums.y_lim <= dma_params.tile.psums.y_step - {12'd0, dma_params.dma.psums.y_step};
+        dma_params.dma.weights.w_lim <= (WXfer_op == 1'b1) ? 1 : (dma_params.tile.weights.c_step - {12'd0, dma_params.dma.weights.w_step});     // WHOLE TILE WILL ALWAYS BE SENT IN A SINGLE DMA TRANSACTION!
+              
         if (Cw_eq && Ch_eq) begin
             dma_params.dma.psums.ett <= dma_params.tile.psums.k_step;
         end else if (Cw_eq) begin
@@ -294,11 +299,11 @@ module sauria_interface #(
 
                 // REG 5
                 dma_params.tile.ifmaps.c_step[23:16]    <= control_regs[5][7:0]; //24
-                dma_params.tile.weights.k_step          <= control_regs[5][19:8]; //12
-                dma_params.tile.weights.c_step[11:0]    <= control_regs[5][31:20]; //24
+                dma_params.tile.weights.k_step          <= control_regs[5][27:8]; //20
+                dma_params.tile.weights.c_step[3:0]    <= control_regs[5][31:28]; //16
 
                 // REG 6
-                dma_params.tile.weights.c_step[23:12]   <= control_regs[6][11:0];
+                dma_params.tile.weights.c_step[15:4]   <= control_regs[6][11:0];
                 dma_params.dma.ifmaps.y_lim             <= control_regs[6][23:12]; //12
                 dma_params.dma.ifmaps.c_lim[7:0]        <= control_regs[6][31:24]; //12
 
@@ -345,6 +350,8 @@ module sauria_interface #(
                 start_wresp_sync                        <= 1'b1;
 
                 start_dma_controller                    <= !control_regs[13][18];
+                
+                WXfer_op                                <= control_regs[13][31];
 
                 state <= SEND_ARGS;
             end

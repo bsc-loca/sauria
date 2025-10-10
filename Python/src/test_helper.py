@@ -538,6 +538,10 @@ def run_cfg_test(HOPTS, assert_no_error=False):
 
     idx = 0
 
+    # READ SAURIA VERSION
+    version_value = HOPTS['X'] + (HOPTS['Y']<<8) + ((HOPTS['IB_W']-1)<<16) + ((HOPTS['IA_W']-1)<<20) + ((HOPTS['OP_TYPE'])<<24)
+    idx = cfg.rd_transaction(idx,cfg_list, HOPTS['CORE_offset']+0x1C,     version_value)
+
     # ACCESS CONTROLLER REGISTERS
     idx = cfg.rd_transaction(idx,cfg_list, HOPTS["CTRL_offset"]+0x0,      0xC000_0000)
     idx+=5 # Wait

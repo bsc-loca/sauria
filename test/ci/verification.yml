@@ -14,7 +14,7 @@ compile:hardware_emu:
         - cd ${CI_PROJECT_DIR}/tools
         - source install_verilator.sh
         - cd ${CI_PROJECT_DIR}/test/verilator
-        - source compile_sauria.sh
+        - source compile_sauria.sh FP16_8x16
     artifacts:
         expire_in: 1 days
         when: on_success

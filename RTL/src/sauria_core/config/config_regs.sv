@@ -681,6 +681,21 @@ always_comb begin
             out_databuf_d = stalls_cnt_q;
         end
 
+        // *************************************************
+        // SAURIA Version Info (Index = 0x7 [Addr = 0x00001C])
+        // *************************************************
+
+        else if (((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_REGS_OFFSET) &&
+                (i_address[SUB_ADR_W-1:0] == 8'h1C)) begin
+
+            out_databuf_d[7:0] =    sauria_pkg::X;
+            out_databuf_d[15:8] =   sauria_pkg::Y;
+            out_databuf_d[19:16] =  (sauria_pkg::IB_W - 1);
+            out_databuf_d[23:20] =  (sauria_pkg::IA_W - 1);
+            out_databuf_d[27:24] =  sauria_pkg::ARITHMETIC;
+            out_databuf_d[31:28] = '0;
+        end
+
         // *********************************************
         // Control Config region (Offset = CON_OFFSET)
         // *********************************************

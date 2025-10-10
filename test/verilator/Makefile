@@ -1,6 +1,5 @@
 default: all
 
-version = FP16_8x16
 arith = EXACT
 base_dir = $(abspath .)
 tb_top = sauria_tester
@@ -34,6 +33,7 @@ junk += Test-Sim
 
 all: verilator.log
 verilator.log:
+	echo $(version_file)
 	verilator --version
 	verilator --cc $(version_file) -F verilator_filelist.f $(veri_flags) $(veri_opt_flags) -o Test-Sim 2>&1 | tee $@
 	cp obj_dir/Test-Sim .

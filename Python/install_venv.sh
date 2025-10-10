@@ -12,7 +12,7 @@ if [ -d "$ENV_DIR" ]; then
 fi
 
 echo "Creating virtual environment (tested using Python 3.9, change version if desired, but some required packages might not be compatible with that specific version of Python)..."
-python --version
+python3 --version
 python3 -m venv "$ENV_DIR"
 
 echo "Activating the virtual environment..."

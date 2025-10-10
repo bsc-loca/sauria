@@ -254,8 +254,6 @@ module sauria_tester(
     integer         n_errs, n_errs_prev;
     logic [7:0]     gold_dram[dat_addr_t];
 
-    assign errors = n_errs;
-
     // Load memories
     initial begin: data_load_check
         $readmemh({`STIMULI_PATH,"/initial_dram.txt"}, i_sim_mem_0.mem, DRAM_OFFSET);
@@ -334,7 +332,7 @@ module sauria_tester(
                     end
                 end
             end
-            n_errs_prev = n_errs;
+            errors = n_errs;
 
             // Write output memory contents to a file for analysis
             if (`WRITE_OUTPUTS == 1)

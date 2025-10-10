@@ -462,8 +462,6 @@ int main(int argc, char** argv, char** env) {
             top->check_flag = 1;
             check_flag = 0;
 
-            total_errors+=top->errors;
-
             // END OF TEST, Except debug_test
             if (!check_read_values){
                 done = 1;
@@ -488,6 +486,11 @@ int main(int argc, char** argv, char** env) {
             exit_delay--;             // postponed delay to allow VCD recording
     
     }
+
+    // Update final error tally
+    total_errors+=(top->errors);
+
+    std::cout << "VALUES VALUE: " << total_errors << std::endl;
 
     // Save final time and number of errors to stats file
     statsFile << main_time << std::endl;

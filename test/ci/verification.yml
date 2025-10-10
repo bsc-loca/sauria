@@ -19,7 +19,6 @@ compile:hardware_emu:
         paths:
             - ${CI_PROJECT_DIR}/test/verilator/verilator.log
             - ${CI_PROJECT_DIR}/test/verilator/Test-Sim
-            - ${CI_PROJECT_DIR}/tools/verilator/*
 
 test:debug_test:
     stage: test

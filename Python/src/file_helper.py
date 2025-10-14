@@ -57,6 +57,9 @@ def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, 
 
     # Create stmuli and output directories if it they don't exist
     if not(os.path.exists(os.path.join(test_dir, "stimuli"))):
+        print("PATH DID NOT EXIST, CREATING")
+    else:
+        print("PATH {} DID EXIST!".format(os.path.join(test_dir, "stimuli")))
         os.mkdir(os.path.join(test_dir, "stimuli"))
     if not(os.path.exists(os.path.join(test_dir, "outputs"))):
         os.mkdir(os.path.join(test_dir, "outputs"))

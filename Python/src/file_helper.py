@@ -55,6 +55,12 @@ def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, 
     # Save output matrices
     # ----------------------------------
 
+    # Create stmuli and output directories if it they don't exist
+    if not(os.path.exists(os.path.join(test_dir, "stimuli"))):
+        os.mkdir(os.path.join(test_dir, "stimuli"))
+    if not(os.path.exists(os.path.join(test_dir, "outputs"))):
+        os.mkdir(os.path.join(test_dir, "outputs"))
+
     # Save matrices
     np.savetxt(os.path.join(test_dir, "stimuli/GoldenStimuli.txt"), Input_Matrix, fmt='%01X', delimiter=' ')
     np.savetxt(os.path.join(test_dir, "stimuli/initial_dram.txt"), DRAM_mem, fmt='%01X', delimiter=' ')

@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     # Debug test is special, we don't use the normal flow
     if (TOPTS['test_type']=='debug_test'):
-        th.run_cfg_test(HW_PARAMS, TOPTS['assert_no_errors'])
+        th.run_cfg_test(HW_PARAMS, TOPTS['assert_no_errors'], test_dir=args.test_dir)
 
     # Normal convolution tests
     else:

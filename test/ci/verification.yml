@@ -9,6 +9,7 @@ compile:hardware_emu:
       - when: always
     script:
         - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd ${CI_PROJECT_DIR}/tools
@@ -35,6 +36,7 @@ test:debug_test:
       - when: on_success
     script:
         - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
@@ -53,6 +55,7 @@ test:bmk_small:
       - when: on_success
     script:
         - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
@@ -71,6 +74,7 @@ test:conv_validation:
       - when: on_success
     script:
         - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts

@@ -621,7 +621,11 @@ def run_cfg_test(HOPTS, assert_no_error=False, test_dir="../../test"):
     # Save output matrices
     # ----------------------------------
 
-    folder = "../../test/"
+    # Create stmuli and output directories if it they don't exist
+    if not(os.path.exists(os.path.join(test_dir, "stimuli"))):
+        os.mkdir(os.path.join(test_dir, "stimuli"))
+    if not(os.path.exists(os.path.join(test_dir, "outputs"))):
+        os.mkdir(os.path.join(test_dir, "outputs"))
 
     # Save matrices
     np.savetxt(os.path.join(test_dir, "stimuli/GoldenStimuli.txt"), Input_Matrix, fmt='%01X', delimiter=' ')
@@ -634,7 +638,7 @@ def run_cfg_test(HOPTS, assert_no_error=False, test_dir="../../test"):
 
     # Execute the simulation in Verilator
     cwd = os.getcwd()
-    os.chdir(folder+"verilator")
+    os.chdir(os.path.join(test_dir, "verilator"))
     subprocess.call(["./Test-Sim","+check_read_values"])
     os.chdir(cwd)
 

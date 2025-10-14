@@ -18,8 +18,8 @@
 // Jordi Fornt <jfornt@bsc.es>
 
 // Systolic Array Configuration
-`define X   16                      // X-size of the systolic array
-`define Y   8                       // Y-size of the systolic array
+`define X   32                      // X-size of the systolic array
+`define Y   32                      // Y-size of the systolic array
 
 // Precision Configuration
 `define ARITHMETIC   0              // Arithmetic representation (0=INT    1=FP)

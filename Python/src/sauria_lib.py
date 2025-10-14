@@ -237,16 +237,16 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     offsets = dh.assign_dram_values(A_tensor, B_tensor, C_preload, C_golden, 0, DRAM_mem, DRAM_mem_gold, CONV_DICT, HOPTS)
 
     # Generate SAURIA config registers    
-    sauria_regs = cfg.get_sauria_regs(CONV_DICT, HOPTS, silent=True)
+    sauria_regs, N_REGS = cfg.get_sauria_regs(CONV_DICT, HOPTS, silent=True)
 
     # Heuristically evaluate the loop order
     _,_,_,loop_order = ex.get_tiling_loops(CONV_DICT)
     
     # Get controller configuration for the hardware
-    controller_args = cfg.get_controller_regs(CONV_DICT, HOPTS, sauria_regs, offsets, loop_order)
+    controller_args = cfg.get_controller_regs(CONV_DICT, sauria_regs, N_REGS, offsets, loop_order)
 
     # Save Test outputs
-    fh.generate_test_files(DRAM_mem, DRAM_mem_gold, [controller_args], [offsets[0],offsets[2],offsets[3]], 1, HOPTS)
+    fh.generate_test_files(DRAM_mem, DRAM_mem_gold, controller_args, [offsets[0],offsets[2],offsets[3]], 1, HOPTS)
     
     # Execute the simulation in Verilator
     cwd = os.getcwd()

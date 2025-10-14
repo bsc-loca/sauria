@@ -32,16 +32,16 @@ def get_params(version):
     # *******************************************
     HOPTS["MainMemory_offset"] =   0x0000_0000      # Starting address of data in main memory
     HOPTS["SAURIA_offset_DMA"] =   0xD000_0000      # SAURIA offset from the POV of DMA
-    HOPTS["CTRL_offset"] =         0x4410_0000      # SAURIA controller offset
-    HOPTS["CORE_offset"] =         0x4420_0000      # SAURIA core offset
-    HOPTS["DMA_offset"] =          0x4430_0000      # uDMA offset
+    HOPTS["CTRL_offset"] =         0x4000_0000      # SAURIA controller offset
+    HOPTS["CORE_offset"] =         0x5000_0000      # SAURIA core offset
+    HOPTS["DMA_offset"] =          0x6000_0000      # uDMA offset
     HOPTS["CFG_CON_offset"] =      0x0000_0200      # Control registers offset
     HOPTS["CFG_IFM_offset"] =      0x0000_0400      # IFmap Feeder registers offset
     HOPTS["CFG_WEI_offset"] =      0x0000_0600      # Weight Fetcher registers offset
     HOPTS["CFG_PSM_offset"] =      0x0000_0800      # Partial sums manager offset
-    HOPTS["MEMA_offset"] =         0x0001_0000      # MEM A access via AXI Lite
-    HOPTS["MEMB_offset"] =         0x0002_0000      # MEM B access via AXI Lite
-    HOPTS["MEMC_offset"] =         0x0003_0000      # MEM C access via AXI Lite
+    HOPTS["MEMA_offset"] =         0x0004_0000      # MEM A access via AXI Lite
+    HOPTS["MEMB_offset"] =         0x0008_0000      # MEM B access via AXI Lite
+    HOPTS["MEMC_offset"] =         0x000C_0000      # MEM C access via AXI Lite
     
     # Config Interface parameters
     # *******************************************
@@ -101,8 +101,8 @@ def get_params(version):
         # Memory Sizes
         # *******************************************
         HOPTS["MEMA_DEPTH"] =          2048
-        HOPTS["MEMB_DEPTH"] =          1024
-        HOPTS["MEMC_DEPTH"] =          2048
+        HOPTS["MEMB_DEPTH"] =          2048
+        HOPTS["MEMC_DEPTH"] =          1024
 
         # Data Interface parameters
         # *******************************************
@@ -140,13 +140,12 @@ def get_params(version):
         HOPTS["add_type"] =            0
         HOPTS["A"] =                   0
 
-    # WARNING!!!!! - Not tested yet!!!!
-    elif version=="FP16_16x16":
+    elif version=="int8_32x32":
 
         # Memory Sizes
         # *******************************************
-        HOPTS["MEMA_DEPTH"] =          1024
-        HOPTS["MEMB_DEPTH"] =          1024
+        HOPTS["MEMA_DEPTH"] =          2048
+        HOPTS["MEMB_DEPTH"] =          2048
         HOPTS["MEMC_DEPTH"] =          1024
 
         # Data Interface parameters
@@ -156,8 +155,8 @@ def get_params(version):
 
         # Systolic Array HW parameters
         # *******************************************
-        HOPTS["X"] =                   16      # SA X size
-        HOPTS["Y"] =                   16      # SA Y size
+        HOPTS["X"] =                   32      # SA X size
+        HOPTS["Y"] =                   32      # SA Y size
         HOPTS["DILP_W"] =              64      # Dilation parameter width
         HOPTS["PARAMS_W"] =            8       # General parameters width
         HOPTS["TH_W"] =                2       # Negligence threshold width
@@ -167,68 +166,23 @@ def get_params(version):
         
         # Arithmetic options
         # *******************************************
-        HOPTS["IA_W"] =                16      # IFmap bits
-        HOPTS["IB_W"] =                16      # Weight bits
-        HOPTS["OC_W"] =                16      # Partial sum bits
-        HOPTS["OP_TYPE"] =             1       # 0 for int, 1 for FP
+        HOPTS["IA_W"] =                8       # IFmap bits
+        HOPTS["IB_W"] =                8       # Weight bits
+        HOPTS["OC_W"] =                32      # Partial sum bits
+        HOPTS["OP_TYPE"] =             0       # 0 for int, 1 for FP
 
         # FP configuration
-        HOPTS["IA_MANT"] =             10      # IFmap mantissa bits
-        HOPTS["IB_MANT"] =             10      # Weight mantissa bits
-        HOPTS["IC_MANT"] =             10      # Partial sum mantissa bits
-        HOPTS["rounding"] =            "RNE"   # Rounding type
+        HOPTS["IA_MANT"] =             0        # IFmap mantissa bits
+        HOPTS["IB_MANT"] =             0        # Weight mantissa bits
+        HOPTS["IC_MANT"] =             0        # Partial sum mantissa bits
+        HOPTS["rounding"] =            "RNE"    # Rounding type
 
         # Approximate computing
         HOPTS["approx_comp"] =         False   # If false, all options are ignored
-        HOPTS["mul_type"] =            3
-        HOPTS["M"] =                   14
-        HOPTS["add_type"] =            4
-        HOPTS["A"] =                   16
-
-    # WARNING!!!!! - Not tested yet!!!!
-    elif version=="int8_16x16":
-
-        # Memory Sizes
-        # *******************************************
-        HOPTS["MEMA_DEPTH"] =          2048
-        HOPTS["MEMB_DEPTH"] =          2048
-        HOPTS["MEMC_DEPTH"] =          512
-
-        # Data Interface parameters
-        # *******************************************
-        HOPTS["DATA_AXI_DATA_WIDTH"] = 128     # Memory interface (AXI4)
-        HOPTS["DATA_AXI_ADDR_WIDTH"] = 32
-
-        # Systolic Array HW parameters
-        # *******************************************
-        HOPTS["X"] =                   16      # SA X size
-        HOPTS["Y"] =                   16      # SA Y size
-        HOPTS["DILP_W"] =              64      # Dilation parameter width
-        HOPTS["PARAMS_W"] =            8       # General parameters width
-        HOPTS["TH_W"] =                2       # Negligence threshold width
-        HOPTS["IFM_FIFO_POSITIONS"] =  5       # IFmap Feeder FIFO positions
-        HOPTS["WEI_FIFO_POSITIONS"] =  4       # Weight Fetcher FIFO positions
-        HOPTS["FIFO_FILL_CYCLES"] =    1       # FIFO filling cycles before computation starts
-        
-        # Arithmetic options
-        # *******************************************
-        HOPTS["IA_W"] =                8      # IFmap bits
-        HOPTS["IB_W"] =                8      # Weight bits
-        HOPTS["OC_W"] =                32     # Partial sum bits
-        HOPTS["OP_TYPE"] =             0      # 0 for int, 1 for FP
-
-        # FP configuration
-        HOPTS["IA_MANT"] =             10      # IFmap mantissa bits
-        HOPTS["IB_MANT"] =             10      # Weight mantissa bits
-        HOPTS["IC_MANT"] =             10      # Partial sum mantissa bits
-        HOPTS["rounding"] =            "RNE"   # Rounding type
-
-        # Approximate computing
-        HOPTS["approx_comp"] =         False   # If false, all options are ignored
-        HOPTS["mul_type"] =            3
-        HOPTS["M"] =                   14
-        HOPTS["add_type"] =            4
-        HOPTS["A"] =                   16
+        HOPTS["mul_type"] =            0
+        HOPTS["M"] =                   0
+        HOPTS["add_type"] =            0
+        HOPTS["A"] =                   0
 
     # Dependent parameters
     HOPTS["MEMA_W"] = HOPTS["Y"]*HOPTS["IA_W"]

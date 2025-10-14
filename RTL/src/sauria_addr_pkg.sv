@@ -20,9 +20,9 @@
 package sauria_addr_pkg;
 
     // Configuration AXI Address Space
-    parameter CONTROLLER_OFFSET = 32'h4410_0000;
-    parameter SAURIA_OFFSET     = 32'h4420_0000;
-    parameter DMA_OFFSET        = 32'h4430_0000;
+    parameter CONTROLLER_OFFSET = 32'h4000_0000;
+    parameter SAURIA_OFFSET     = 32'h5000_0000;
+    parameter DMA_OFFSET        = 32'h6000_0000;
 
     // SAURIA Internal Address Space
     parameter CFG_REGS_OFFSET   = 32'h0000_0000;
@@ -30,9 +30,9 @@ package sauria_addr_pkg;
     parameter CFG_ACT_OFFSET    = 32'h0000_0400;
     parameter CFG_WEI_OFFSET    = 32'h0000_0600;
     parameter CFG_OUT_OFFSET    = 32'h0000_0800;
-    parameter SRAMA_OFFSET      = 32'h0001_0000;
-    parameter SRAMB_OFFSET      = 32'h0002_0000;
-    parameter SRAMC_OFFSET      = 32'h0003_0000;
+    parameter SRAMA_OFFSET      = 32'h0004_0000;
+    parameter SRAMB_OFFSET      = 32'h0008_0000;
+    parameter SRAMC_OFFSET      = 32'h000C_0000;
 
     // DMA Internal Address Space
     parameter SAURIA_DMA_OFFSET         = 32'hD000_0000;
@@ -40,10 +40,10 @@ package sauria_addr_pkg;
 
     // Address masks
     parameter AXI_CONTROLLER_ADDR_MASK      = 32'hFFFF_FF00;
-    parameter AXI_SAURIA_ADDR_MASK          = 32'hFFF0_0000;
+    parameter AXI_SAURIA_ADDR_MASK          = 32'hFFC0_0000;
     parameter AXI_DMA_ADDR_MASK             = 32'hFFFF_FFC0;
 
-    parameter SAURIA_MEM_ADDR_MASK          = 32'h000F_0000;
+    parameter SAURIA_MEM_ADDR_MASK          = 32'h003C_0000;
     parameter SAURIA_REG_ADDR_MASK          = 32'h000F_FE00;
 
 endpackage

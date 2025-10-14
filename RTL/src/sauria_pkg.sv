@@ -28,8 +28,6 @@ package sauria_pkg;
     parameter TH_W = 2;                         // Negligence threshold bit width
     parameter PARAMS_W = 8;                     // Parametric bit width (controls width of different signals)
 
-    parameter SRAMC_N = int'(SRAMC_W/OC_W);     // SRAM C - number of elements in the bus
-
     // Arithmetic & PE Configuration
     parameter STAGES_MUL = `STAGES_MUL;         // Multiplier : Internal pipeline stages (Unsupported for FP)
     parameter INTERMEDIATE_PIPELINE_STAGE = `INTERMEDIATE_PIPELINE_STAGE;  // Pipeline stage between multiplier and adder (1=True; 0=False)
@@ -67,6 +65,15 @@ package sauria_pkg;
     parameter RF_C          = 0;                // Set to 1 to partition SRAMC into several small Register Files
     parameter ADRC_W = $clog2(SRAMC_DEPTH);     // SRAM C address width
 
+    parameter int SRAMA_N = int'(SRAMA_W/IA_W);     // Number of elements in the bus
+    parameter int SRAMB_N = int'(SRAMB_W/IB_W);     // Ditto
+    parameter int SRAMC_N = int'(SRAMC_W/OC_W);     // Ditto
+
+    // Counter index width: address width + word offset + 1
+    parameter int ACT_IDX_W = ADRA_W + $clog2(SRAMA_N) + 1;
+    parameter int WEI_IDX_W = ADRB_W + $clog2(SRAMB_N) + 1;
+    parameter int OUT_IDX_W = ADRC_W + $clog2(SRAMC_N) + 1;
+
     // IFmap Feeders Configuration
     parameter M = `M;                           // Replication factor of IFmap Feeder
     parameter ACT_FIFO_POSITIONS = `ACT_FIFO_POSITIONS;// IFmap FIFO positions (total registers = Positions*M)
@@ -90,5 +97,17 @@ package sauria_pkg;
     parameter DMA_SYNC_AW_W                 = 0;        // synchronize AW and W channels; adress is not valid until there is data availbale in the writer FIFO
     parameter DMA_MAX_OUTSTANDING_READS     = 8;        // Max concurrent reads
     parameter DMA_MAX_OUTSTANDING_WRITES    = 8;        // Max concurrent writes
+
+    // SAURIA Configuration register parameters ('Real' in order to properly apply the ceiling function)
+    parameter real TOTAL_BITS_CON =         ACT_IDX_W + 2*OUT_IDX_W + TH_W + 2;
+    parameter real TOTAL_BITS_ACT =         Y + DILP_W + 10*ACT_IDX_W + Y*PARAMS_W;
+    parameter real TOTAL_BITS_WEI =         X + 6*WEI_IDX_W + 1;
+    parameter real TOTAL_BITS_OUT =         1 + PARAMS_W + 9*OUT_IDX_W;
+
+    // Register count
+    localparam int TOTAL_REGS_CON = $ceil(sauria_pkg::TOTAL_BITS_CON/32);
+    localparam int TOTAL_REGS_ACT = $ceil(sauria_pkg::TOTAL_BITS_ACT/32);
+    localparam int TOTAL_REGS_WEI = $ceil(sauria_pkg::TOTAL_BITS_WEI/32);
+    localparam int TOTAL_REGS_OUT = $ceil(sauria_pkg::TOTAL_BITS_OUT/32);
 
 endpackage

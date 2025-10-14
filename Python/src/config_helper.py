@@ -323,7 +323,6 @@ def get_sauria_regs(CONV, HYPER, silent=True):
     # Control Registers
     for r, nregs in enumerate(region_regs):
         for i in range(int(nregs)):
-            
             if (r==0):      offset = HYPER['CFG_CON_offset']
             elif (r==1):    offset = HYPER['CFG_IFM_offset']
             elif (r==2):    offset = HYPER['CFG_WEI_offset']
@@ -336,13 +335,13 @@ def get_sauria_regs(CONV, HYPER, silent=True):
             register_config[regidx,1] = regval
             regidx+=1    
 
-    return register_config
+    return register_config, TOTAL_REGS
 
 # ----------------------------
 # Generate SAURIA controller config regs
 # ----------------------------
 
-def get_controller_regs(CONV, HYPER, sauria_regs, dram_base_addresses, loop_order, silent=True):
+def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_order, silent=True):
 
     Bw = CONV['B_w']
     Bh = CONV['B_h']
@@ -401,58 +400,71 @@ def get_controller_regs(CONV, HYPER, sauria_regs, dram_base_addresses, loop_orde
     dma_weights_w_step = Ck
 
     # Set 64-bit arguments to be passed to Picos
-    args = [0]*17
+    args = [0]*(14 + N_REGS)
+
     args[0] = set_bits(args[0], 11, 0,  tile_x_lim)
     args[0] = set_bits(args[0], 23, 12, tile_y_lim)
-    args[0] = set_bits(args[0], 35, 24, tile_c_lim)
-    args[0] = set_bits(args[0], 47, 36, tile_k_lim)
-    args[0] = set_bits(args[0], 59, 48, tile_psums_x_step)
-    args[0] = set_bits(args[0], 63, 60, tile_psums_y_step)
-    args[1] = set_bits(args[1], 19, 0,  tile_psums_y_step >> 4)
-    args[1] = set_bits(args[1], 43, 20, tile_psums_k_step)
-    args[1] = set_bits(args[1], 55, 44, tile_ifmaps_x_step)
-    args[1] = set_bits(args[1], 63, 56, tile_ifmaps_y_step)
-    args[2] = set_bits(args[2], 15, 0,  tile_ifmaps_y_step >> 8)
-    args[2] = set_bits(args[2], 39, 16, tile_ifmaps_c_step)
-    args[2] = set_bits(args[2], 51, 40, tile_weights_k_step)
-    args[2] = set_bits(args[2], 63, 52, tile_weights_c_step)
-    args[3] = set_bits(args[3], 11, 0,  tile_weights_c_step >> 12)
-    args[3] = set_bits(args[3], 23, 12, dma_ifmaps_y_lim)
-    args[3] = set_bits(args[3], 35, 24, dma_ifmaps_c_lim)
-    args[3] = set_bits(args[3], 47, 36, dma_psums_y_step)
-    args[3] = set_bits(args[3], 63, 48, dma_psums_k_step)
-    args[4] = set_bits(args[4], 7,  0,  dma_psums_k_step >> 16)
-    args[4] = set_bits(args[4], 19, 8,  dma_ifmaps_y_step)
-    args[4] = set_bits(args[4], 43, 20, dma_ifmaps_c_step)
-    args[4] = set_bits(args[4], 55, 44, dma_weights_w_step)
-    args[4] = set_bits(args[4], 63, 56, dma_ifmaps_ett)
-    args[5] = set_bits(args[5], 15, 0,  dma_ifmaps_ett >> 8)
-    args[5] = set_bits(args[5], 47, 16, dram_base_addresses[0])
-    args[5] = set_bits(args[5], 63, 48, dram_base_addresses[1])
-    args[6] = set_bits(args[6], 15, 0,  dram_base_addresses[1] >> 16)
-    args[6] = set_bits(args[6], 47, 16, dram_base_addresses[2])
-    args[6] = set_bits(args[6], 49, 48, loop_order)
-    args[6] = set_bits(args[6], 50, 50, 0)              #stand alone
-    args[6] = set_bits(args[6], 51, 51, 0)              #keep A
-    args[6] = set_bits(args[6], 52, 52, 0)              #keep B
-    args[6] = set_bits(args[6], 53, 53, 0)              #keep C
-    args[6] = set_bits(args[6], 54, 54, 0)              #disable start
-    args[6] = set_bits(args[6], 55, 55, Cw == Cw_til)
-    args[6] = set_bits(args[6], 56, 56, Ch == Ch_til)
-    args[6] = set_bits(args[6], 57, 57, Ck == Ck_til)
+    args[0] = set_bits(args[0], 31, 24, tile_c_lim)
+
+    args[1] = set_bits(args[1], 3, 0, tile_c_lim >> 8)
+    args[1] = set_bits(args[1], 15, 4, tile_k_lim)
+    args[1] = set_bits(args[1], 27, 16, tile_psums_x_step)
+    args[1] = set_bits(args[1], 31, 28, tile_psums_y_step)
+
+    args[2] = set_bits(args[2], 19, 0,  tile_psums_y_step >> 4)
+    args[2] = set_bits(args[2], 31, 20, tile_psums_k_step)
+
+    args[3] = set_bits(args[3], 11, 0, tile_psums_k_step >> 12)
+    args[3] = set_bits(args[3], 23, 12, tile_ifmaps_x_step)
+    args[3] = set_bits(args[3], 31, 24, tile_ifmaps_y_step)
+
+    args[4] = set_bits(args[4], 15, 0,  tile_ifmaps_y_step >> 8)
+    args[4] = set_bits(args[4], 31, 16, tile_ifmaps_c_step)
+
+    args[5] = set_bits(args[5], 7, 0, tile_ifmaps_c_step >> 16)
+    args[5] = set_bits(args[5], 19, 8, tile_weights_k_step)
+    args[5] = set_bits(args[5], 31, 20, tile_weights_c_step)
+
+    args[6] = set_bits(args[6], 11, 0,  tile_weights_c_step >> 12)
+    args[6] = set_bits(args[6], 23, 12, dma_ifmaps_y_lim)
+    args[6] = set_bits(args[6], 31, 24, dma_ifmaps_c_lim)
+
+    args[7] = set_bits(args[7], 3, 0, dma_ifmaps_c_lim >> 8)
+    args[7] = set_bits(args[7], 15, 4, dma_psums_y_step)
+    args[7] = set_bits(args[7], 31, 16, dma_psums_k_step)
+
+    args[8] = set_bits(args[8], 7,  0,  dma_psums_k_step >> 16)
+    args[8] = set_bits(args[8], 19, 8,  dma_ifmaps_y_step)
+    args[8] = set_bits(args[8], 31, 20, dma_ifmaps_c_step)
+
+    args[9] = set_bits(args[9], 11, 0, dma_ifmaps_c_step >> 12)
+    args[9] = set_bits(args[9], 23, 12, dma_weights_w_step)
+    args[9] = set_bits(args[9], 31, 24, dma_ifmaps_ett)
+
+    args[10] = set_bits(args[10], 15, 0,  dma_ifmaps_ett >> 8)
+    args[10] = set_bits(args[10], 31, 16, dram_base_addresses[0])
+
+    args[11] = set_bits(args[11], 15, 0, dram_base_addresses[0] >> 16)
+    args[11] = set_bits(args[11], 31, 16, dram_base_addresses[1])
+
+    args[12] = set_bits(args[12], 15, 0,  dram_base_addresses[1] >> 16)
+    args[12] = set_bits(args[12], 31, 16, dram_base_addresses[2])
+
+    args[13] = set_bits(args[13], 15, 0, dram_base_addresses[2] >> 16)
+    args[13] = set_bits(args[13], 17, 16, loop_order)
+    args[13] = set_bits(args[13], 18, 18, 0)              #stand alone
+    args[13] = set_bits(args[13], 19, 19, 0)              #keep A
+    args[13] = set_bits(args[13], 20, 20, 0)              #keep B
+    args[13] = set_bits(args[13], 21, 21, 0)              #keep C
+    args[13] = set_bits(args[13], 22, 22, 0)              #disable start
+    args[13] = set_bits(args[13], 23, 23, Cw == Cw_til)
+    args[13] = set_bits(args[13], 24, 24, Ch == Ch_til)
+    args[13] = set_bits(args[13], 25, 25, Ck == Ck_til)
     
+    # Set SAURIA regs, which are already packed and can span a variable number of regs
     sauria_acc_args = sauria_regs[:,1]
     
-    args[7] = (sauria_acc_args[1] << 32) | sauria_acc_args[0]
-    args[8] = (sauria_acc_args[3] << 32) | sauria_acc_args[2]
-    args[9] = (sauria_acc_args[5] << 32) | sauria_acc_args[4]
-    args[10] = (sauria_acc_args[7] << 32) | sauria_acc_args[6]
-    args[11] = (sauria_acc_args[9] << 32) | sauria_acc_args[8]
-    args[12] = (sauria_acc_args[11] << 32) | sauria_acc_args[10]
-    args[13] = (sauria_acc_args[13] << 32) | sauria_acc_args[12]
-    args[14] = (sauria_acc_args[15] << 32) | sauria_acc_args[14]
-    args[15] = (sauria_acc_args[17] << 32) | sauria_acc_args[16]
-    args[16] = (sauria_acc_args[19] << 32) | sauria_acc_args[18]
+    args[14:] = sauria_acc_args
 
     return args
 
@@ -488,12 +500,6 @@ def generate_controller_cmds(controller_regs, N_VECTORS, HOPTS):
 
     ctrl_regs_array = np.array(controller_regs, dtype=np.uint64).astype(np.int64)
 
-    # Split 64-bit picos regs into 32-bit DMA controller config words
-    dmactrl_regs_array = np.zeros([ctrl_regs_array.shape[0],2*ctrl_regs_array.shape[1]], np.int64)
-
-    dmactrl_regs_array[:,0::2] = ctrl_regs_array & 0xFFFFFFFF
-    dmactrl_regs_array[:,1::2] = (ctrl_regs_array >> 32) & 0xFFFFFFFF
-
     # Create control words
     cfg_address = np.zeros((N_VECTORS), dtype=np.uint32)
     cfg_data_in = np.zeros((N_VECTORS), dtype=np.uint64)
@@ -512,29 +518,28 @@ def generate_controller_cmds(controller_regs, N_VECTORS, HOPTS):
     # Enable interrupts initially
     idx = wr_transaction(idx,cfg, offs+0x8,3)
 
-    for test_regs in dmactrl_regs_array:
-        # Write cfg registers
-        for i, reg in enumerate(test_regs):
-            idx = wr_transaction(idx,cfg, offs+0x10+(i<<2),reg)
+    # Write cfg registers
+    for i, reg in enumerate(ctrl_regs_array):
+        idx = wr_transaction(idx,cfg, offs+0x10+(i<<2),reg)
 
-        # Start control FSM
-        idx = wr_transaction(idx,cfg, offs+0x0,3)
+    # Start control FSM
+    idx = wr_transaction(idx,cfg, offs+0x0,3)
 
-        # Wait for completion
-        cfg_waitflag[idx] =   1
-        idx+=1
+    # Wait for completion
+    cfg_waitflag[idx] =   1
+    idx+=1
 
-        # Lower interrupts
-        idx = wr_transaction(idx,cfg, offs+0xC,3)
+    # Lower interrupts
+    idx = wr_transaction(idx,cfg, offs+0xC,3)
 
-        # READ STATISTICS - Total cycle counter
-        idx = rd_transaction(idx,cfg, HOPTS['CORE_offset']+0x14,0,check_golden=False)
+    # READ STATISTICS - Total cycle counter
+    idx = rd_transaction(idx,cfg, HOPTS['CORE_offset']+0x14,0,check_golden=False)
 
-        # READ STATISTICS - Stall cycle counter
-        idx = rd_transaction(idx,cfg, HOPTS['CORE_offset']+0x18,0,check_golden=False)
+    # READ STATISTICS - Stall cycle counter
+    idx = rd_transaction(idx,cfg, HOPTS['CORE_offset']+0x18,0,check_golden=False)
 
-        # Check flag -> Finishes test!
-        cfg_checkflag[idx] =  1
-        idx+=2
+    # Check flag -> Finishes test!
+    cfg_checkflag[idx] =  1
+    idx+=2
 
     return cfg_address, cfg_data_in, cfg_wren, cfg_rden, cfg_waitflag, cfg_checkflag, cfg_data_out

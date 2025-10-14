@@ -134,18 +134,6 @@ module config_regs #(
 localparam IF_LSB_BITS = $clog2(IF_W/8);
 localparam SUB_ADR_W = 8;
 
-// Registers bitcount
-localparam real TOTAL_BITS_CON =         ACT_IDX_W + 2*OUT_IDX_W + TH_W + 2;
-localparam real TOTAL_BITS_ACT =         Y + DILP_W + 10*ACT_IDX_W + Y*PARAMS_W;
-localparam real TOTAL_BITS_WEI =         X + 6*WEI_IDX_W + 1;
-localparam real TOTAL_BITS_OUT =         1 + PARAMS_W + 9*OUT_IDX_W;
-
-// Register count
-localparam int TOTAL_REGS_CON =         $ceil(TOTAL_BITS_CON/IF_W);
-localparam int TOTAL_REGS_ACT =         $ceil(TOTAL_BITS_ACT/IF_W);
-localparam int TOTAL_REGS_WEI =         $ceil(TOTAL_BITS_WEI/IF_W);
-localparam int TOTAL_REGS_OUT =         $ceil(TOTAL_BITS_OUT/IF_W);
-
 // Offset regions
 localparam logic [3:0] CON_OFFSET = 4'b001;
 localparam logic [3:0] ACT_OFFSET = 4'b010;
@@ -156,22 +144,22 @@ localparam logic [3:0] OUT_OFFSET = 4'b100;
 logic [SUB_ADR_W-1:0]       addressing_idx;
 
 // Main registers
-logic [0:TOTAL_REGS_CON-1][IF_W-1:0]    reg_con_q, reg_con_q2, reg_con_d, reg_con_mux;
-logic [0:TOTAL_REGS_ACT-1][IF_W-1:0]    reg_act_q, reg_act_q2, reg_act_d, reg_act_mux;
-logic [0:TOTAL_REGS_WEI-1][IF_W-1:0]    reg_wei_q, reg_wei_q2, reg_wei_d, reg_wei_mux;
-logic [0:TOTAL_REGS_OUT-1][IF_W-1:0]    reg_out_q, reg_out_q2, reg_out_d, reg_out_mux;
+logic [0:sauria_pkg::TOTAL_REGS_CON-1][IF_W-1:0]    reg_con_q, reg_con_q2, reg_con_d, reg_con_mux;
+logic [0:sauria_pkg::TOTAL_REGS_ACT-1][IF_W-1:0]    reg_act_q, reg_act_q2, reg_act_d, reg_act_mux;
+logic [0:sauria_pkg::TOTAL_REGS_WEI-1][IF_W-1:0]    reg_wei_q, reg_wei_q2, reg_wei_d, reg_wei_mux;
+logic [0:sauria_pkg::TOTAL_REGS_OUT-1][IF_W-1:0]    reg_out_q, reg_out_q2, reg_out_d, reg_out_mux;
 
 // Default values of main registers
-logic [0:TOTAL_REGS_CON-1][IF_W-1:0]    reg_con_default;
-logic [0:TOTAL_REGS_ACT-1][IF_W-1:0]    reg_act_default;
-logic [0:TOTAL_REGS_WEI-1][IF_W-1:0]    reg_wei_default;
-logic [0:TOTAL_REGS_OUT-1][IF_W-1:0]    reg_out_default;
+logic [0:sauria_pkg::TOTAL_REGS_CON-1][IF_W-1:0]    reg_con_default;
+logic [0:sauria_pkg::TOTAL_REGS_ACT-1][IF_W-1:0]    reg_act_default;
+logic [0:sauria_pkg::TOTAL_REGS_WEI-1][IF_W-1:0]    reg_wei_default;
+logic [0:sauria_pkg::TOTAL_REGS_OUT-1][IF_W-1:0]    reg_out_default;
 
 // Unpacked arrays to load values from memory
-logic [IF_W-1:0] reg_con_file [0:TOTAL_REGS_CON-1];
-logic [IF_W-1:0] reg_act_file [0:TOTAL_REGS_ACT-1];
-logic [IF_W-1:0] reg_wei_file [0:TOTAL_REGS_WEI-1];
-logic [IF_W-1:0] reg_out_file [0:TOTAL_REGS_OUT-1];
+logic [IF_W-1:0] reg_con_file [0:sauria_pkg::TOTAL_REGS_CON-1];
+logic [IF_W-1:0] reg_act_file [0:sauria_pkg::TOTAL_REGS_ACT-1];
+logic [IF_W-1:0] reg_wei_file [0:sauria_pkg::TOTAL_REGS_WEI-1];
+logic [IF_W-1:0] reg_out_file [0:sauria_pkg::TOTAL_REGS_OUT-1];
 
 // Special registers
 logic start_q, start_q_prv, start_d;
@@ -233,25 +221,25 @@ assign o_cols_active = cols_active_BE;
 // Assign values to wires
 genvar i_con;
     generate
-        for (i_con=0; i_con < TOTAL_REGS_CON; i_con++) begin
+        for (i_con=0; i_con < sauria_pkg::TOTAL_REGS_CON; i_con++) begin
 			assign reg_con_default[i_con] = reg_con_file[i_con];
         end
     endgenerate
 genvar i_act;
     generate
-        for (i_act=0; i_act < TOTAL_REGS_ACT; i_act++) begin
+        for (i_act=0; i_act < sauria_pkg::TOTAL_REGS_ACT; i_act++) begin
 			assign reg_act_default[i_act] = reg_act_file[i_act];
         end
     endgenerate
 genvar i_wei;
     generate
-        for (i_wei=0; i_wei < TOTAL_REGS_WEI; i_wei++) begin
+        for (i_wei=0; i_wei < sauria_pkg::TOTAL_REGS_WEI; i_wei++) begin
 			assign reg_wei_default[i_wei] = reg_wei_file[i_wei];
         end
     endgenerate
 genvar i_out;
     generate
-        for (i_out=0; i_out < TOTAL_REGS_OUT; i_out++) begin
+        for (i_out=0; i_out < sauria_pkg::TOTAL_REGS_OUT; i_out++) begin
 			assign reg_out_default[i_out] = reg_out_file[i_out];
         end
     endgenerate
@@ -701,7 +689,7 @@ always_comb begin
         // *********************************************
 
         else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_CON_OFFSET) begin
-            if (addressing_idx<TOTAL_REGS_CON) begin
+            if (addressing_idx<sauria_pkg::TOTAL_REGS_CON) begin
                 out_databuf_d = reg_con_q[addressing_idx];
             end
         end
@@ -711,7 +699,7 @@ always_comb begin
         // ***********************************************
 
         else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_ACT_OFFSET) begin
-            if (addressing_idx<TOTAL_REGS_ACT) begin
+            if (addressing_idx<sauria_pkg::TOTAL_REGS_ACT) begin
                 out_databuf_d = reg_act_q[addressing_idx];
             end
         end
@@ -721,7 +709,7 @@ always_comb begin
         // ********************************************
 
         else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_WEI_OFFSET) begin
-            if (addressing_idx<TOTAL_REGS_WEI) begin
+            if (addressing_idx<sauria_pkg::TOTAL_REGS_WEI) begin
                 out_databuf_d = reg_wei_q[addressing_idx];
             end
         end
@@ -731,7 +719,7 @@ always_comb begin
         // ********************************************
 
         else if ((i_address & sauria_addr_pkg::SAURIA_REG_ADDR_MASK)==sauria_addr_pkg::CFG_OUT_OFFSET) begin
-            if (addressing_idx<TOTAL_REGS_OUT) begin
+            if (addressing_idx<sauria_pkg::TOTAL_REGS_OUT) begin
                 out_databuf_d = reg_out_q[addressing_idx];
             end
         end
@@ -751,7 +739,7 @@ always_comb begin
 	// Control config region
 	// ***************************************************
 
-    for (integer b=0; b<TOTAL_BITS_CON; b++) begin
+    for (integer b=0; b<sauria_pkg::TOTAL_BITS_CON; b++) begin
         if (b<ACT_IDX_W) begin
             o_incntlim[b] =                             reg_con_mux[b/IF_W][b%IF_W];
 
@@ -776,7 +764,7 @@ always_comb begin
 	// Activation config region
 	// ***************************************************
 
-    for (integer b=0; b<TOTAL_BITS_ACT; b++) begin
+    for (integer b=0; b<sauria_pkg::TOTAL_BITS_ACT; b++) begin
         if (b<ACT_IDX_W) begin
             o_xlim[b] = 				                reg_act_mux[b/IF_W][b%IF_W];
 
@@ -827,7 +815,7 @@ always_comb begin
 	// Weight config region
 	// ***************************************************
 
-    for (integer b=0; b<TOTAL_BITS_WEI; b++) begin
+    for (integer b=0; b<sauria_pkg::TOTAL_BITS_WEI; b++) begin
         if (b<WEI_IDX_W) begin
             o_wlim[b] =                                 reg_wei_mux[b/IF_W][b%IF_W];
 
@@ -858,7 +846,7 @@ always_comb begin
 	// Output config region
 	// ***************************************************
 
-    for (integer b=0; b<TOTAL_BITS_OUT; b++) begin
+    for (integer b=0; b<sauria_pkg::TOTAL_BITS_OUT; b++) begin
         if (b<OUT_IDX_W) begin
             o_ncontexts[b] =                            reg_out_mux[b/IF_W][b%IF_W];
 

@@ -100,8 +100,6 @@ module sauria_core #(
 // Signals for SRAM connection
 // ------------------------------------------------------------
 
-localparam SRAMC_N = sauria_pkg::SRAMC_W/sauria_pkg::OC_W;
-
 // SAURIA logic config interface (smol AXI)
 logic  [CFG_AXI_ADDR_WIDTH-1:0]     cfg_addr;
 logic  [CFG_AXI_DATA_WIDTH-1:0]     cfg_din;

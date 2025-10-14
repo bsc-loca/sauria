@@ -81,8 +81,6 @@ package df_ctrl_pkg;
         DMAPointers dma;
     } DMAParams;
 
-    localparam SAURIA_NARGS = 17;
-
     localparam A_BYTES = (`IA_W/8);
     localparam B_BYTES = (`IB_W/8);
     localparam C_BYTES = (`OC_W/8);

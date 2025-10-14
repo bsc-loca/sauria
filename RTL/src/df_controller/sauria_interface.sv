@@ -46,7 +46,10 @@ module sauria_interface #(
     localparam WEIGHT_FEEDER_BASE_OFFSET    = sauria_addr_pkg::CFG_WEI_OFFSET;
     localparam PS_MANAGER_BASE_OFFSET       = sauria_addr_pkg::CFG_OUT_OFFSET;
 
-    localparam N_SAURIA_CFG_WRITES = 22;
+    localparam N_SAURIA_REGS = sauria_pkg::TOTAL_REGS_CON + sauria_pkg::TOTAL_REGS_ACT + sauria_pkg::TOTAL_REGS_WEI + sauria_pkg::TOTAL_REGS_OUT;
+    localparam N_SAURIA_CFG_WRITES = 2 + N_SAURIA_REGS;
+
+    localparam REGS_CNT_BITS = $clog2(N_SAURIA_CFG_WRITES);
 
     typedef enum bit [4:0] {
         IDLE,
@@ -79,8 +82,8 @@ module sauria_interface #(
     reg [31:0] start_SRAMC_addr;
     reg [1:0] loop_order;
     reg [12:0] addr;
-    reg [3:0] count;
-    reg [4:0] sauria_reg_idx;
+    reg [REGS_CNT_BITS-1:0] count;
+    reg [REGS_CNT_BITS-1:0] sauria_reg_idx;
     reg part_sel;
     reg addr_sent;
     reg data_sent;
@@ -92,7 +95,7 @@ module sauria_interface #(
     reg stand_alone_keep_B;
     reg stand_alone_keep_C;
 
-    reg [4:0] wresp_count;
+    reg [REGS_CNT_BITS-1:0] wresp_count;
     reg start_wresp_sync;
     reg wresp_sync_state;
 
@@ -157,31 +160,18 @@ module sauria_interface #(
         case (state)
 
             SEND_ARGS: begin
-                case (sauria_reg_idx)
-                    0:   sauria_axilite.wdata = control_regs[14];
-                    1:   sauria_axilite.wdata = control_regs[15];
-                    2:   sauria_axilite.wdata = control_regs[16];
-                    3:   sauria_axilite.wdata = control_regs[17];
-                    4:   sauria_axilite.wdata = control_regs[18];
-                    5:   sauria_axilite.wdata = control_regs[19];
-                    6:   sauria_axilite.wdata = control_regs[20];
-                    7:   sauria_axilite.wdata = control_regs[21];
-                    8:   sauria_axilite.wdata = control_regs[22];
-                    9:   sauria_axilite.wdata = control_regs[23];
-                    10:  sauria_axilite.wdata = control_regs[24];
-                    11:  sauria_axilite.wdata = control_regs[25];
-                    12:  sauria_axilite.wdata = control_regs[26];
-                    13:  sauria_axilite.wdata = control_regs[27];
-                    14:  sauria_axilite.wdata = control_regs[28];
-                    15:  sauria_axilite.wdata = control_regs[29];
-                    16:  sauria_axilite.wdata = control_regs[30];
-                    17:  sauria_axilite.wdata = control_regs[31];
-                    18:  sauria_axilite.wdata = control_regs[32];
-                    19:  sauria_axilite.wdata = control_regs[33];
-                    20:  sauria_axilite.wdata = 32'h1;              // Global interrupt enable
-                    21:  sauria_axilite.wdata = 32'h1;              // Done interrupt enable
-                    default:  sauria_axilite.wdata = '0;
-                endcase
+                // Main registers
+                if (sauria_reg_idx<N_SAURIA_REGS) begin
+                    sauria_axilite.wdata = control_regs[14+sauria_reg_idx];
+                
+                // Interrupt enables
+                end else if (sauria_reg_idx<N_SAURIA_CFG_WRITES) begin
+                    sauria_axilite.wdata = 32'h1;
+
+                // Other cases
+                end else begin
+                    sauria_axilite.wdata = '0;
+                end
             end
 
             SEND_START_DATA: begin
@@ -255,7 +245,7 @@ module sauria_interface #(
                 part_sel <= 1'b0;
                 addr_sent <= 1'b0;
                 data_sent <= 1'b0;
-                count <= 4'd1;
+                count <= sauria_pkg::TOTAL_REGS_CON - 1;
                 sauria_reg_idx <= '0;
                 last_sync_1 <= 1'b0;
                 last_sync_2 <= 1'b0;
@@ -360,17 +350,17 @@ module sauria_interface #(
                     if (count == 4'd0) begin
                         case (current_addr_region)
                             MAIN_FSM: begin
-                                count <= 4'd8;
+                                count <= sauria_pkg::TOTAL_REGS_ACT - 1;
                                 addr <= LFMAP_FEEDER_BASE_OFFSET;
                                 current_addr_region <= LFMAP_FEEDER;
                             end
                             LFMAP_FEEDER: begin
-                                count <= 4'd3;
+                                count <= sauria_pkg::TOTAL_REGS_WEI - 1;
                                 addr <= WEIGHT_FEEDER_BASE_OFFSET;
                                 current_addr_region <= WEIGHT_FEEDER;
                             end
                             WEIGHT_FEEDER: begin
-                                count <= 4'd4;
+                                count <= sauria_pkg::TOTAL_REGS_OUT - 1;
                                 addr <= PS_MANAGER_BASE_OFFSET;
                                 current_addr_region <= PS_MANAGER;
                             end

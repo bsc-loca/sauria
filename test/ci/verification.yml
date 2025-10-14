@@ -1,4 +1,4 @@
-compile:hardware_emu:
+compile:hardware_emu_FP16_8x16:
     stage: compile
     extends: .simulation
     tags:
@@ -23,29 +23,35 @@ compile:hardware_emu:
             - ${CI_PROJECT_DIR}/test/verilator/verilator.log
             - ${CI_PROJECT_DIR}/test/verilator/Test-Sim
 
-test:debug_test:
-    stage: test
-    dependencies:
-      - compile:hardware_emu
+compile:hardware_emu_int8_32x32:
+    stage: compile
     extends: .simulation
     tags:
         - dv
     rules:
       - if: '$CI_SKIP_SIMULATION == "true"'
         when: never
-      - when: on_success
+      - when: always
     script:
         - source ${CI_PROJECT_DIR}/test/ci/setup.sh
         - apt install python3.8-venv
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
-        - cd scripts
-        - python run_verif_test.py --test_type debug_test --assert_no_errors
+        - cd ${CI_PROJECT_DIR}/tools
+        - source install_verilator.sh
+        - cd ${CI_PROJECT_DIR}/test/verilator
+        - source compile_sauria.sh int8_32x32
+    artifacts:
+        expire_in: 1 days
+        when: on_success
+        paths:
+            - ${CI_PROJECT_DIR}/test/verilator/verilator.log
+            - ${CI_PROJECT_DIR}/test/verilator/Test-Sim
 
-test:bmk_small:
+test:debug_test_FP16_8x16:
     stage: test
     dependencies:
-      - compile:hardware_emu
+      - compile:hardware_emu_FP16_8x16
     extends: .simulation
     tags:
         - dv
@@ -59,12 +65,12 @@ test:bmk_small:
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
-        - python run_verif_test.py --test_type bmk_small --assert_no_errors
+        - python run_verif_test.py --test_type debug_test --assert_no_errors --test_dir $TEST_DIR
 
-test:conv_validation:
+test:bmk_small_FP16_8x16:
     stage: test
     dependencies:
-      - compile:hardware_emu
+      - compile:hardware_emu_FP16_8x16
     extends: .simulation
     tags:
         - dv
@@ -78,4 +84,61 @@ test:conv_validation:
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
-        - python run_verif_test.py --test_type conv_validation --assert_no_errors
+        - python run_verif_test.py --test_type bmk_small --assert_no_errors --test_dir $TEST_DIR
+
+test:conv_validation_FP16_8x16:
+    stage: test
+    dependencies:
+      - compile:hardware_emu_FP16_8x16
+    extends: .simulation
+    tags:
+        - dv
+    rules:
+      - if: '$CI_SKIP_SIMULATION == "true"'
+        when: never
+      - when: on_success
+    script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
+        - cd scripts
+        - python run_verif_test.py --test_type conv_validation --assert_no_errors --test_dir $TEST_DIR
+
+test:bmk_small_int8_32x32:
+    stage: test
+    dependencies:
+      - compile:hardware_emu_int8_32x32
+    extends: .simulation
+    tags:
+        - dv
+    rules:
+      - if: '$CI_SKIP_SIMULATION == "true"'
+        when: never
+      - when: on_success
+    script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
+        - cd scripts
+        - python run_verif_test.py --version int8_32x32 --test_type bmk_small --assert_no_errors --test_dir $TEST_DIR
+
+test:conv_validation_int8_32x32:
+    stage: test
+    dependencies:
+      - compile:hardware_emu_int8_32x32
+    extends: .simulation
+    tags:
+        - dv
+    rules:
+      - if: '$CI_SKIP_SIMULATION == "true"'
+        when: never
+      - when: on_success
+    script:
+        - source ${CI_PROJECT_DIR}/test/ci/setup.sh
+        - apt install python3.8-venv
+        - cd ${CI_PROJECT_DIR}/Python
+        - source install_venv.sh
+        - cd scripts
+        - python run_verif_test.py --version int8_32x32 --test_type conv_validation --assert_no_errors --test_dir $TEST_DIR

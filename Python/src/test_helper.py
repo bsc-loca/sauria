@@ -429,25 +429,25 @@ def extend_random_tests(TESTS, TILEINFO, random_tests, max_tiles=10):
 def gen_small_bmk_tests(X, Y, MEMC_size):
 
     # Full convolution sizes
-    Bw_list =       [3,    1,   7,   3]
-    Bh_list =       [3,    1,   7,   3]
-    d_list =        [1,    1,   1,   9]
-    s_list =        [1,    1,   3,   1]
-    c_list =        [64, 100,  16,  50]
+    Bw_list =       [3,     1,      7,      3]
+    Bh_list =       [3,     1,      7,      3]
+    d_list =        [1,     1,      1,      9]
+    s_list =        [1,     1,      3,      1]
+    c_list =        [64,    100,    16,     50]
     
-    Cw_list =       [32,  64,   16,  8]
-    Ch_list =       [16,   8,   8,   3]
-    Cc_list =       [32,  32,   32,  32]
+    Cw_list =       [4*Y,   4*Y,    2*Y,    Y]
+    Ch_list =       [16,    8,      8,      3]
+    Cc_list =       [4*X,   2*X,    2*X,    2*X]
     
-    Xu_list =       [X,    X,    X,  X]
-    Yu_list =       [Y,    Y,    Y,  Y]
-    preload_list =  [1,    1,    1,  1]
+    Xu_list =       [X,     X,      X,      X]
+    Yu_list =       [Y,     Y,      Y,      Y]
+    preload_list =  [1,     1,      1,      1]
 
     # Tile sizes
-    c_til_list =    [32, 100,   16,  25]
-    k_til_list =    [32,  32,   16,  16]
-    h_til_list =    [8,    4,    4,   3]
-    w_til_list =    [32,  32,   16,   8]
+    w_til_list =    [2*Y,   4*Y,    2*Y,    Y]
+    h_til_list =    [8,     4,      4,      3]
+    k_til_list =    [2*X,   2*X,    X,      X]
+    c_til_list =    [32,    100,    16,     25]
 
     FIXTESTS = [Bw_list, Bh_list, d_list, s_list, c_list, Cw_list, Ch_list, Cc_list, Xu_list, Yu_list, preload_list]
 

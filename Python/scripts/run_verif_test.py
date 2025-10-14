@@ -128,7 +128,6 @@ if __name__ == "__main__":
             TILING_DICT = {
                 'C_tile_shape'  :   [TILEINFO[1][i],TILEINFO[2][i],TILEINFO[3][i]],  #[C_out, Ch, Cw]
                 'tile_cin'      :   TILEINFO[0][i],
-                'loop_order'    :   1,
                 'X_used'        :   TESTS[8][i],
                 'Y_used'        :   TESTS[9][i]
             }
@@ -136,10 +135,11 @@ if __name__ == "__main__":
             preload = TESTS[10][i]
 
             if not silent:
-                print("------------------------------------------------------------")
+                print("------------------------------------------------------------------------------------------------------------------------")
                 print("Test number {}".format(i+1))
-                print("Bw={}, Bh={}, AB_c={}, C_w={}, C_h={}, C_c={}, s={}, d={}, Xu={}, Yu={}".format(TESTS[0][i], TESTS[1][i], TESTS[4][i], TESTS[5][i], TESTS[6][i], TESTS[7][i], s, d, TESTS[8][i], TESTS[9][i]))
-                print("------------------------------------------------------------")
+                print("PSum size: [{},{},{}] | Weight size: [{},{},{},{}] | Input size: [{},{},{}] | d={}, s={}, p={}".format(tensor_shapes[2][0],tensor_shapes[2][1],tensor_shapes[2][2],tensor_shapes[1][0],tensor_shapes[1][1],tensor_shapes[1][2],tensor_shapes[1][3],tensor_shapes[0][0],tensor_shapes[0][1],tensor_shapes[0][2],d,s,0))
+                print("Tile size: [{},{},{}] | C_in tile size: {} | X_used: {}, Y_used: {} ".format(TILEINFO[1][i],TILEINFO[2][i],TILEINFO[3][i],TILEINFO[0][i],TESTS[8][i],TESTS[9][i]))
+                print("------------------------------------------------------------------------------------------------------------------------")
                 
             # Generate random values and run convolution
             slib.generate_and_run_test(tensor_shapes, TILING_DICT, d, s, HW_PARAMS, preload=preload, generate_vcd=False, pzero_tensors=TOPTS['pzero_tensors'], insert_deadbeef=TOPTS['insert_deadbeef'], gauss_scale=TOPTS['gauss_scale'], ones_test=TOPTS['ones_test'], print_statistics=TOPTS['print_statistics'], assert_no_errors=TOPTS['assert_no_errors'], test_dir=args.test_dir, silent=silent)

@@ -83,6 +83,15 @@ def get_conv_dict(tensor_shapes, TILING_DICT, HOPTS, preloads=0, d=1, s=1, p=0):
     h_til =     TILING_DICT['C_tile_shape'][1]
     w_til =     TILING_DICT['C_tile_shape'][2]
 
+    # Essential assertions
+    # --------------------------------------------------------------------------
+
+    assert w_til%Y_used == 0, "ERROR - Tiling size in the W dimension must be a multiple of Y_used !"
+    assert k_til%X_used == 0, "ERROR - Tiling size in the C_out dimension must be a multiple of X_used !"
+
+    assert C_w%w_til == 0, "ERROR - Full tensor size Cw must be a multiple of the tiling size in the W dimension !"
+    assert C_c%k_til == 0, "ERROR - Full tensor size C_out must be a multiple of the tiling size in the C_out dimension !"
+
     # Derived constants
     # --------------------------------------------------------------------------
     

@@ -302,7 +302,7 @@ def pack_as_bytes(MEM, data_array, start_bit_index, bit_width):
 # Writes the tensors into a DRAM memory region
 # ------------------------------------------------------
 
-def assign_dram_values(A_tensor, B_tensor, C_tensor, C_output, dram_offset, DRAM_mem, DRAM_mem_gold, CONV, HYPER):
+def assign_dram_values(A_tensor, B_tensor, C_tensor, C_output, dram_offset, CONV, HYPER):
     
     # Get flat & encoded tensors
     A_tensor_flat, B_tensor_flat, C_tensor_flat, C_output_flat = flatten_tensors(A_tensor, B_tensor, C_tensor, C_output, CONV, HYPER)
@@ -313,6 +313,14 @@ def assign_dram_values(A_tensor, B_tensor, C_tensor, C_output, dram_offset, DRAM
 
     # Initialize bit index
     bit_idx = 8*dram_offset
+
+    # Initialize DRAM regions
+    A_tensor_size = int(A_tensor.size * np.ceil(A_bit_width/8))
+    B_tensor_size = int(B_tensor.size * np.ceil(B_bit_width/8))
+    C_tensor_size = int(C_tensor.size * np.ceil(C_bit_width/8))
+
+    DRAM_mem = np.zeros((A_tensor_size+B_tensor_size+C_tensor_size), dtype=np.uint8)
+    DRAM_mem_gold = np.zeros((A_tensor_size+B_tensor_size+C_tensor_size), dtype=np.uint8)                                 
 
     # Write inputs
     A_tensor_offset = int(np.floor(bit_idx/8))
@@ -338,4 +346,4 @@ def assign_dram_values(A_tensor, B_tensor, C_tensor, C_output, dram_offset, DRAM
     # Total number of bytes
     region_len = int(np.ceil(bit_idx/8)) - dram_offset
 
-    return [A_tensor_offset, B_tensor_offset, C_tensor_offset, region_len]
+    return DRAM_mem, DRAM_mem_gold, [A_tensor_offset, B_tensor_offset, C_tensor_offset, region_len]

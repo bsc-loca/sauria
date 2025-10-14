@@ -228,13 +228,10 @@ def get_conv_dict(tensor_shapes, TILING_DICT, HOPTS, preloads=0, d=1, s=1, p=0):
 # Full SAURIA Operation, including RTL simulation
 # ---------------------------------------------
 
-def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=False, assert_no_errors = False, max_mem_size=0x800000, print_statistics=True, test_dir="../../test", silent=True):
+def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=False, assert_no_errors = False, print_statistics=True, test_dir="../../test", silent=True):
 
-    DRAM_mem = np.zeros((max_mem_size), dtype=np.uint8)
-    DRAM_mem_gold = np.zeros((max_mem_size), dtype=np.uint8)
-                                        
     # Write values into simulated main memory
-    offsets = dh.assign_dram_values(A_tensor, B_tensor, C_preload, C_golden, 0, DRAM_mem, DRAM_mem_gold, CONV_DICT, HOPTS)
+    DRAM_mem, DRAM_mem_gold, offsets = dh.assign_dram_values(A_tensor, B_tensor, C_preload, C_golden, 0, CONV_DICT, HOPTS)
 
     # Generate SAURIA config registers    
     sauria_regs, N_REGS = cfg.get_sauria_regs(CONV_DICT, HOPTS, silent=True)
@@ -246,7 +243,7 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     controller_args = cfg.get_controller_regs(CONV_DICT, sauria_regs, N_REGS, offsets, loop_order)
 
     # Save Test outputs
-    fh.generate_test_files(DRAM_mem, DRAM_mem_gold, controller_args, [offsets[0],offsets[2],offsets[3]], 1, HOPTS, test_dir=test_dir)
+    fh.generate_test_files(DRAM_mem, DRAM_mem_gold, controller_args, [offsets[0],offsets[2],offsets[3]], HOPTS, N_REGS, test_dir=test_dir)
     
     # Execute the simulation in Verilator
     cwd = os.getcwd()
@@ -259,8 +256,7 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     os.chdir(cwd)
 
     # Retrieve the output values
-    out_values, stats_dict, n_test_errors = fh.parse_test_outputs(HOPTS, test_dir=test_dir)
-    out_values = out_values[:C_preload.size]
+    out_values, stats_dict, n_test_errors = fh.parse_test_outputs(HOPTS, C_preload.size, test_dir=test_dir)
 
     # Transform integer into real values if needed
     if HOPTS['OP_TYPE'] == 1:

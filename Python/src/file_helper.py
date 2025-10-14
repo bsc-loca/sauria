@@ -31,9 +31,9 @@ import src.config_helper as cfg
 # STIMULI MANAGEMENT
 # ---------------------------------------
 
-def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, N_tests, HOPTS, test_dir="../../test"):
+def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, HOPTS, N_REGS, test_dir="../../test"):
     
-    N_VECTORS = 50*N_tests
+    N_VECTORS = N_REGS + 100 # Variable sized register region + an offset for high level configuration (100 should be more than enough)
             
     # Fill config arrays
     # ----------------------------------
@@ -78,7 +78,7 @@ def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, 
 # OUTPUT FILE PARSING
 # ---------------------------------------
 
-def parse_test_outputs(HOPTS, test_dir="../../test"):
+def parse_test_outputs(HOPTS, tensor_size, test_dir="../../test"):
 
    # Read tensor outputs
     raw_outputs = np.loadtxt(os.path.join(test_dir, "outputs/test_results.txt"), dtype=str)
@@ -86,9 +86,13 @@ def parse_test_outputs(HOPTS, test_dir="../../test"):
     # Transform strings into 8b integer values
     out_bytes = np.array([int(x,16) for x in raw_outputs[1:]])
 
-    # Join bytes into words (values) - WARNING - We assume words are multiples of 8b!!!!
+    # Cap data to total tensor size (usually there is some padding)
     N_bytes = int(np.ceil(HOPTS['OC_W']/8))
+    out_bytes = out_bytes[:tensor_size*N_bytes]
+
+    # Join bytes into words (values) - WARNING - We assume words are multiples of 8b!!!!
     out_values = np.zeros(int(out_bytes.size//N_bytes),dtype=np.int64)
+
     for i in range(N_bytes):
         out_values += (out_bytes[i::N_bytes] << 8*(i))
 

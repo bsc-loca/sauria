@@ -31,7 +31,7 @@ import src.config_helper as cfg
 # STIMULI MANAGEMENT
 # ---------------------------------------
 
-def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, N_tests, HOPTS):
+def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, N_tests, HOPTS, test_dir="../../test"):
     
     N_VECTORS = 50*N_tests
             
@@ -55,29 +55,22 @@ def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, 
     # Save output matrices
     # ----------------------------------
 
-    # Append string to add to file names (mark approximate values)
-    app_str = "" if not HOPTS['approx_comp'] else "_approx"
-
-    folder = "../../test/stimuli/"
-
     # Save matrices
-    np.savetxt(folder+"GoldenStimuli"+app_str+".txt", Input_Matrix, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"initial_dram"+app_str+".txt", DRAM_mem, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"gold_dram"+app_str+".txt", DRAM_mem_gold, fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/GoldenStimuli.txt"), Input_Matrix, fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/initial_dram.txt"), DRAM_mem, fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/gold_dram.txt"), DRAM_mem_gold, fmt='%01X', delimiter=' ')
     
     # Generate and save test config file 
-    np.savetxt(folder+"tstcfg"+app_str+".txt", np.array(testcfg_list), fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/tstcfg.txt"), np.array(testcfg_list), fmt='%01X', delimiter=' ')
 
     # Remove previous outputs to raise an error in case nothing is produced
-    outfolder = "../../test/outputs/"
-
     # No error if files do not exist
     try:
-        os.remove(outfolder+"test_results.txt")
+        os.remove(os.path.join(test_dir, "outputs/test_results.txt"))
     except OSError:
         pass
     try:
-        os.remove(outfolder+"test_stats.txt")
+        os.remove(os.path.join(test_dir, "outputs/test_stats.txt"))
     except OSError:
         pass
 
@@ -85,11 +78,10 @@ def generate_test_files(DRAM_mem, DRAM_mem_gold, controller_regs, testcfg_list, 
 # OUTPUT FILE PARSING
 # ---------------------------------------
 
-def parse_test_outputs(HOPTS):
+def parse_test_outputs(HOPTS, test_dir="../../test"):
 
    # Read tensor outputs
-    folder = "../../test/outputs/"
-    raw_outputs = np.loadtxt(folder+"test_results.txt", dtype=str)
+    raw_outputs = np.loadtxt(os.path.join(test_dir, "outputs/test_results.txt"), dtype=str)
 
     # Transform strings into 8b integer values
     out_bytes = np.array([int(x,16) for x in raw_outputs[1:]])
@@ -101,7 +93,7 @@ def parse_test_outputs(HOPTS):
         out_values += (out_bytes[i::N_bytes] << 8*(i))
 
     # Read statistics outputs
-    stats_outputs = np.loadtxt(folder+"test_stats.txt", dtype=int)
+    stats_outputs = np.loadtxt(os.path.join(test_dir, "outputs/test_stats.txt"), dtype=int)
     stats_dict = {
         '1tile_SAURIA_cycles'   :   stats_outputs[0],
         '1tile_SAURIA_stalls'   :   stats_outputs[1],

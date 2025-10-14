@@ -63,6 +63,8 @@ if __name__ == "__main__":
     parser.add_argument('--pzero_B', default=0.0, help='Probability of 0s in Tensor B')
     parser.add_argument('--pzero_C', default=0.0, help='Probability of 0s in Tensor C')
 
+    parser.add_argument('--test_dir', default="../../test", help='Test directory where intermediate files will be stored.')
+
     # Parse arguments
     args = parser.parse_args()
     version = args.version
@@ -140,4 +142,5 @@ if __name__ == "__main__":
                 print("------------------------------------------------------------")
                 
             # Generate random values and run convolution
-            slib.generate_and_run_test(tensor_shapes, TILING_DICT, d, s, HW_PARAMS, preload=preload, generate_vcd=False, pzero_tensors=TOPTS['pzero_tensors'], insert_deadbeef=TOPTS['insert_deadbeef'], gauss_scale=TOPTS['gauss_scale'], ones_test=TOPTS['ones_test'], print_statistics=TOPTS['print_statistics'], assert_no_errors=TOPTS['assert_no_errors'], silent=silent)
+            slib.generate_and_run_test(tensor_shapes, TILING_DICT, d, s, HW_PARAMS, preload=preload, generate_vcd=False, pzero_tensors=TOPTS['pzero_tensors'], insert_deadbeef=TOPTS['insert_deadbeef'], gauss_scale=TOPTS['gauss_scale'], ones_test=TOPTS['ones_test'], print_statistics=TOPTS['print_statistics'], assert_no_errors=TOPTS['assert_no_errors'], test_dir=args.test_dir, silent=silent)
+            

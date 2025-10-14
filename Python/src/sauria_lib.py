@@ -228,7 +228,7 @@ def get_conv_dict(tensor_shapes, TILING_DICT, HOPTS, preloads=0, d=1, s=1, p=0):
 # Full SAURIA Operation, including RTL simulation
 # ---------------------------------------------
 
-def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=False, assert_no_errors = False, max_mem_size=0x800000, print_statistics=True, silent=True):
+def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=False, assert_no_errors = False, max_mem_size=0x800000, print_statistics=True, test_dir="../../test", silent=True):
 
     DRAM_mem = np.zeros((max_mem_size), dtype=np.uint8)
     DRAM_mem_gold = np.zeros((max_mem_size), dtype=np.uint8)
@@ -246,7 +246,7 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     controller_args = cfg.get_controller_regs(CONV_DICT, sauria_regs, N_REGS, offsets, loop_order)
 
     # Save Test outputs
-    fh.generate_test_files(DRAM_mem, DRAM_mem_gold, controller_args, [offsets[0],offsets[2],offsets[3]], 1, HOPTS)
+    fh.generate_test_files(DRAM_mem, DRAM_mem_gold, controller_args, [offsets[0],offsets[2],offsets[3]], 1, HOPTS, test_dir=test_dir)
     
     # Execute the simulation in Verilator
     cwd = os.getcwd()
@@ -259,7 +259,7 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     os.chdir(cwd)
 
     # Retrieve the output values
-    out_values, stats_dict, n_test_errors = fh.parse_test_outputs(HOPTS)
+    out_values, stats_dict, n_test_errors = fh.parse_test_outputs(HOPTS, test_dir=test_dir)
     out_values = out_values[:C_preload.size]
 
     # Transform integer into real values if needed
@@ -336,20 +336,20 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
 # Full SAURIA test, including random tensor generation
 # -------------------------------------------------------
 
-def generate_and_run_test(tensor_shapes, tiling_dict, d, s, HOPTS, preload=True, compute_macs=False, generate_vcd=False, pzero_tensors=[0,0,0], insert_deadbeef=True, gauss_scale=1, ones_test=False, assert_no_errors=False, print_statistics=True, silent=True):
+def generate_and_run_test(tensor_shapes, tiling_dict, d, s, HOPTS, preload=True, compute_macs=False, generate_vcd=False, pzero_tensors=[0,0,0], insert_deadbeef=True, gauss_scale=1, ones_test=False, assert_no_errors=False, print_statistics=True, test_dir="../../test", silent=True):
 
     # Get convolution configuration
     CONV_DICT = get_conv_dict(tensor_shapes, tiling_dict, HOPTS, d=d, s=s, preloads=preload)
 
     # Generate A, B, C random tensors
-    A_tensor, B_tensor, C_preload = dh.generate_tensors(CONV_DICT, HOPTS, pzero=pzero_tensors, insert_deadbeef=insert_deadbeef)
+    A_tensor, B_tensor, C_preload = dh.generate_tensors(CONV_DICT, HOPTS, pzero=pzero_tensors, insert_deadbeef=insert_deadbeef, gauss_scale=gauss_scale, ones_test=ones_test)
     if not preload: C_preload[:]=0
 
     # Perform convolution with systolic array model
     C_golden, partial_macs, _ = ex.get_ideal_results(A_tensor, B_tensor, C_preload, CONV_DICT, HOPTS, get_sa_dict(HOPTS), compute_macs=compute_macs)
                  
     # Execute convolution
-    SAURIA_outputs, SAURIA_stats = Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=generate_vcd, print_statistics=print_statistics, silent=silent)
+    SAURIA_outputs, SAURIA_stats = Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=generate_vcd, assert_no_errors=assert_no_errors, print_statistics=print_statistics, test_dir=test_dir, silent=silent)
            
     return SAURIA_outputs, SAURIA_stats, partial_macs
 

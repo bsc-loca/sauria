@@ -514,7 +514,7 @@ def get_conv_limits(HOPTS):
 # Configuration & debug bus test
 # --------------------------------------
 
-def run_cfg_test(HOPTS, assert_no_error=False):
+def run_cfg_test(HOPTS, assert_no_error=False, test_dir="../../test"):
 
     # Max number of vectors
     N_VECTORS = 600
@@ -624,13 +624,13 @@ def run_cfg_test(HOPTS, assert_no_error=False):
     folder = "../../test/"
 
     # Save matrices
-    np.savetxt(folder+"stimuli/GoldenStimuli.txt", Input_Matrix, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"stimuli/initial_dram.txt", DRAM_mem, fmt='%01X', delimiter=' ')
-    np.savetxt(folder+"stimuli/gold_dram.txt", DRAM_mem_gold, fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/GoldenStimuli.txt"), Input_Matrix, fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/initial_dram.txt"), DRAM_mem, fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/gold_dram.txt"), DRAM_mem_gold, fmt='%01X', delimiter=' ')
     
     # Generate and save (dummy) test config file
     testcfg_list = [1,1,1]
-    np.savetxt(folder+"stimuli/tstcfg.txt", np.array(testcfg_list), fmt='%01X', delimiter=' ')
+    np.savetxt(os.path.join(test_dir, "stimuli/tstcfg.txt"), np.array(testcfg_list), fmt='%01X', delimiter=' ')
 
     # Execute the simulation in Verilator
     cwd = os.getcwd()
@@ -639,7 +639,7 @@ def run_cfg_test(HOPTS, assert_no_error=False):
     os.chdir(cwd)
 
     # Test outputs now look different, however, the last value is always the number of errors
-    stats_outputs = np.loadtxt(folder+"outputs/test_stats.txt", dtype=int)
+    stats_outputs = np.loadtxt(os.path.join(test_dir, "outputs/test_stats.txt"), dtype=int)
     n_errors = stats_outputs[-1]
 
     if n_errors==0:

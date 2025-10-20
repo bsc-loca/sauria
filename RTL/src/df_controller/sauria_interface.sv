@@ -220,10 +220,6 @@ module sauria_interface #(
         start_wresp_sync <= 1'b0;
         start_dma_controller <= 1'b0;
 
-//        dma_params.dma.psums.k_lim <= dma_params.tile.weights.k_step - 12'd1;
-//        dma_params.dma.psums.y_lim <= dma_params.tile.psums.y_step - {12'd0, dma_params.dma.psums.y_step};
-//        dma_params.dma.weights.w_lim <= dma_params.tile.weights.c_step - {12'd0, dma_params.dma.weights.w_step};
-
         dma_params.dma.psums.k_lim <= (WXfer_op == 1'b1) ? (dma_params.dma.weights.w_step - 12'd1) : (dma_params.tile.weights.k_step - 12'd1);  // ETIL_W_WSTEP = Cout -> Becomes an auxiliary register to not mess up PSUMS
         dma_params.dma.psums.y_lim <= dma_params.tile.psums.y_step - {12'd0, dma_params.dma.psums.y_step};
         dma_params.dma.weights.w_lim <= (WXfer_op == 1'b1) ? 1 : (dma_params.tile.weights.c_step - {12'd0, dma_params.dma.weights.w_step});     // WHOLE TILE WILL ALWAYS BE SENT IN A SINGLE DMA TRANSACTION!

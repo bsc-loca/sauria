@@ -248,14 +248,11 @@ def generate_tensors(CONV, HYPER, pzero=[0,0,0], insert_deadbeef=True, gauss_sca
 
 def flatten_tensors(A_tensor, B_tensor, C_tensor, C_output, CONV, HYPER):
     
-    # Normal convolution
     A_tensor_flat = A_tensor.flatten()
+    B_tensor_flat = B_tensor.flatten()
     C_tensor_flat = C_tensor.flatten()
     C_output_flat = C_output.flatten()
-    
-    # Weights tensor has the output channel dimension contiguous!
-    B_tensor_flat = np.moveaxis(B_tensor, 0, -1).flatten()
-                
+                   
     # If FP mode, encode values
     if (HYPER['OP_TYPE']==1):
         A_tensor_flat = encode_array_to_FP(A_tensor_flat, HYPER['IA_MANT'], HYPER['IA_W'])
@@ -297,6 +294,26 @@ def pack_as_bytes(MEM, data_array, start_bit_index, bit_width):
             remaining_bits -= curr_bits
 
     return bit_idx
+
+# ------------------------------------------------------
+# Reshape Weights tensor to make all transfers contiguous
+# ------------------------------------------------------
+
+def optimize_weight_tensor_shape(B_tensor, CONV):
+
+    # Original tensor is: [C_out, C_in, K_h, K_w]
+    
+    # 1: [C_out, C_in, K_h, K_w] -> [K_tiles, k_til, C_in, K_h, K_w]
+    B_tensor_opt = np.reshape(B_tensor, [CONV['K_ext_tiles'], CONV['k_til'], CONV['AB_c'], CONV['B_h'], CONV['B_w']])
+
+    # 2: [K_tiles, k_til, C_in, K_h, K_w] -> [K_tiles, k_til, C_tiles, c_til, K_h, K_w]
+    B_tensor_opt = np.reshape(B_tensor_opt, [CONV['K_ext_tiles'], CONV['k_til'], CONV['C_ext_tiles'], CONV['c_til'], CONV['B_h'], CONV['B_w']])
+
+    # 3: [K_tiles, k_til, C_tiles, c_til, K_h, K_w] -> [K_tiles, C_tiles, c_til, K_h, K_w, k_til]
+    B_tensor_opt = np.moveaxis(B_tensor_opt, 1, -1)
+
+    # Final tensor is: [K_tiles, C_tiles, c_til, K_h, K_w, k_til]
+    return B_tensor_opt
 
 # ------------------------------------------------------
 # Writes the tensors into a DRAM memory region

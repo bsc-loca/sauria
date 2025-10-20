@@ -362,6 +362,9 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     Ah_til = CONV['A_h_til']
     Ac_til = CONV['c_til']
 
+    # WXfer_op -> always optimize weights shape for memory transfers
+    WXfer_op = True
+
     tile_x_lim = int(Cw/Cw_til) - 1
     tile_y_lim = int(Ch/Ch_til) - 1
     tile_k_lim = int(Ck/Ck_til) - 1
@@ -375,9 +378,17 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     tile_ifmaps_y_step = s*Ch_til*Aw
     tile_ifmaps_c_step = Ac_til*Aw*Ah
     
-    tile_weights_k_step = Ck_til
-    tile_weights_c_step = Ac_til*Ck*Bw*Bh
-    
+    if WXfer_op:
+        tile_weights_k_step = Ck_til*Bw*Bh*Ac
+        tile_weights_c_step = Ck_til*Bw*Bh*Ac_til
+        dma_weights_w_step = Ck     # Meaning is different!
+        Ck_eq = True
+    else:
+        tile_weights_k_step = Ck_til
+        tile_weights_c_step = Ac_til*Ck*Bw*Bh
+        dma_weights_w_step = Ck
+        Ck_eq = (Ck == Ck_til)
+
     dma_psums_y_step = Cw
     dma_psums_k_step = Ch*Cw
     
@@ -396,8 +407,6 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     
     dma_ifmaps_y_step = Aw
     dma_ifmaps_c_step = Ah*Aw
-    
-    dma_weights_w_step = Ck
 
     # Set 64-bit arguments to be passed to Picos
     args = [0]*(14 + N_REGS)
@@ -422,10 +431,10 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     args[4] = set_bits(args[4], 31, 16, tile_ifmaps_c_step)
 
     args[5] = set_bits(args[5], 7, 0, tile_ifmaps_c_step >> 16)
-    args[5] = set_bits(args[5], 19, 8, tile_weights_k_step)
-    args[5] = set_bits(args[5], 31, 20, tile_weights_c_step)
+    args[5] = set_bits(args[5], 27, 8, tile_weights_k_step)
+    args[5] = set_bits(args[5], 31, 28, tile_weights_c_step)
 
-    args[6] = set_bits(args[6], 11, 0,  tile_weights_c_step >> 12)
+    args[6] = set_bits(args[6], 11, 0,  tile_weights_c_step >> 4)
     args[6] = set_bits(args[6], 23, 12, dma_ifmaps_y_lim)
     args[6] = set_bits(args[6], 31, 24, dma_ifmaps_c_lim)
 
@@ -459,7 +468,8 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     args[13] = set_bits(args[13], 22, 22, 0)              #disable start
     args[13] = set_bits(args[13], 23, 23, Cw == Cw_til)
     args[13] = set_bits(args[13], 24, 24, Ch == Ch_til)
-    args[13] = set_bits(args[13], 25, 25, Ck == Ck_til)
+    args[13] = set_bits(args[13], 25, 25, Ck_eq)
+    args[13] = set_bits(args[13], 31, 31, WXfer_op)
     
     # Set SAURIA regs, which are already packed and can span a variable number of regs
     sauria_acc_args = sauria_regs[:,1]

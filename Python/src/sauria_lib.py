@@ -239,8 +239,11 @@ def get_conv_dict(tensor_shapes, TILING_DICT, HOPTS, preloads=0, d=1, s=1, p=0):
 
 def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, generate_vcd=False, assert_no_errors = False, print_statistics=True, test_dir="../../test", silent=True):
 
+    # Optimize weight tensor shape for maximum memory transfer efficiency
+    B_tensor_opt = dh.optimize_weight_tensor_shape(B_tensor, CONV_DICT)
+
     # Write values into simulated main memory
-    DRAM_mem, DRAM_mem_gold, offsets = dh.assign_dram_values(A_tensor, B_tensor, C_preload, C_golden, 0, CONV_DICT, HOPTS)
+    DRAM_mem, DRAM_mem_gold, offsets = dh.assign_dram_values(A_tensor, B_tensor_opt, C_preload, C_golden, 0, CONV_DICT, HOPTS)
 
     # Generate SAURIA config registers    
     sauria_regs, N_REGS = cfg.get_sauria_regs(CONV_DICT, HOPTS, silent=True)

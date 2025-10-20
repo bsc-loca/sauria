@@ -268,14 +268,14 @@ def Conv2d_SAURIA(A_tensor, B_tensor, C_preload, C_golden, CONV_DICT, HOPTS, gen
     os.chdir(cwd)
 
     # Retrieve the output values
-    out_values, stats_dict, n_test_errors = fh.parse_test_outputs(HOPTS, C_preload.size, test_dir=test_dir)
+    out_values, stats_dict, n_test_errors = fh.parse_test_outputs(HOPTS, C_golden.size, test_dir=test_dir)
 
     # Transform integer into real values if needed
     if HOPTS['OP_TYPE'] == 1:
         out_values = dh.decode_FP_array(out_values, 10, 5)
 
     # Reshape into final form
-    output_tensor = np.reshape(out_values, C_preload.shape)
+    output_tensor = np.reshape(out_values, C_golden.shape)
 
     # SAURIA statistics & performance metrics
     # -----------------------------------------

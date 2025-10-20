@@ -321,9 +321,6 @@ def optimize_weight_tensor_shape(B_tensor, CONV):
 
 def assign_dram_values(A_tensor, B_tensor, C_tensor, C_output, dram_offset, CONV, HYPER):
     
-    # Get flat & encoded tensors
-    A_tensor_flat, B_tensor_flat, C_tensor_flat, C_output_flat = flatten_tensors(A_tensor, B_tensor, C_tensor, C_output, CONV, HYPER)
-
     A_bit_width = HYPER['IA_W']
     B_bit_width = HYPER['IB_W']
     C_bit_width = HYPER['OC_W']
@@ -334,10 +331,21 @@ def assign_dram_values(A_tensor, B_tensor, C_tensor, C_output, dram_offset, CONV
     # Initialize DRAM regions
     A_tensor_size = int(A_tensor.size * np.ceil(A_bit_width/8))
     B_tensor_size = int(B_tensor.size * np.ceil(B_bit_width/8))
-    C_tensor_size = int(C_tensor.size * np.ceil(C_bit_width/8))
+
+    # If preloads are defined, use them
+    if C_tensor is not None:
+        C_tensor_size = int(C_tensor.size * np.ceil(C_bit_width/8))
+    
+    # Otherwise, initialize all locations to zero
+    else:
+        C_tensor_size = int(C_output.size * np.ceil(C_bit_width/8))
+        C_tensor = np.zeros(C_output.shape, dtype=C_output.dtype)
 
     DRAM_mem = np.zeros((A_tensor_size+B_tensor_size+C_tensor_size), dtype=np.uint8)
-    DRAM_mem_gold = np.zeros((A_tensor_size+B_tensor_size+C_tensor_size), dtype=np.uint8)                                 
+    DRAM_mem_gold = np.zeros((A_tensor_size+B_tensor_size+C_tensor_size), dtype=np.uint8)  
+
+    # Get flat & encoded tensors
+    A_tensor_flat, B_tensor_flat, C_tensor_flat, C_output_flat = flatten_tensors(A_tensor, B_tensor, C_tensor, C_output, CONV, HYPER)                               
 
     # Write inputs
     A_tensor_offset = int(np.floor(bit_idx/8))

@@ -111,16 +111,16 @@ module sauria_dma_controller (
 
     reg [31:0] ett;
     wire [31:0] btt;
-    reg [23:0] ystep;
-    reg [23:0] zstep;
-    reg [23:0] ycounter;
-    reg [23:0] zcounter;
-    reg [23:0] y;
-    reg [23:0] z;
-    reg [23:0] ylim;
-    reg [23:0] zlim;
-    reg [23:0] y_incr;
-    reg [23:0] z_incr;
+    reg [31:0] ystep;
+    reg [31:0] zstep;
+    reg [31:0] ycounter;
+    reg [31:0] zcounter;
+    reg [31:0] y;
+    reg [31:0] z;
+    reg [31:0] ylim;
+    reg [31:0] zlim;
+    reg [31:0] y_incr;
+    reg [31:0] z_incr;
 
     reg advance;
     wire [31:0] ifmap_xcounter;

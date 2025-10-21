@@ -412,7 +412,7 @@ int main(int argc, char** argv, char** env) {
 
                                 if (check_read_values && (expected_rd != rd_databuf)) {
                                     total_errors+=1;
-                                    std::cout << "Error! Expected " << std::hex << expected_rd << std::dec << std::endl;
+                                    std::cout << "Error! Expected " << std::hex << expected_rd <<  " but got " << rd_databuf << std::dec << std::endl;
                                 }
 
                                 // Save read contents to statsFile
@@ -489,8 +489,6 @@ int main(int argc, char** argv, char** env) {
 
     // Update final error tally
     total_errors+=(top->errors);
-
-    std::cout << "VALUES VALUE: " << total_errors << std::endl;
 
     // Save final time and number of errors to stats file
     statsFile << main_time << std::endl;

@@ -163,7 +163,7 @@ module sauria_interface #(
             SEND_ARGS: begin
                 // Main registers
                 if (sauria_reg_idx<N_SAURIA_REGS) begin
-                    sauria_axilite.wdata = control_regs[14+sauria_reg_idx];
+                    sauria_axilite.wdata = control_regs[22+sauria_reg_idx];
                 
                 // Interrupt enables
                 end else if (sauria_reg_idx<N_SAURIA_CFG_WRITES) begin
@@ -259,85 +259,51 @@ module sauria_interface #(
 
             READ_ARGS: begin
 
-                // REG 0
-                dma_params.tile.x_lim                   <= control_regs[0][11:0]; //12
-                dma_params.tile.y_lim                   <= control_regs[0][23:12]; //12
-                dma_params.tile.c_lim[7:0]              <= control_regs[0][31:24]; //12
+                // REG 0 - 2x16 bits
+                dma_params.tile.x_lim                   <= control_regs[0][15:0];
+                dma_params.tile.y_lim                   <= control_regs[0][31:16];
 
-                // REG 1
-                dma_params.tile.c_lim[11:8]             <= control_regs[1][3:0]; //12
-                dma_params.tile.k_lim                   <= control_regs[1][15:4]; //12
-                dma_params.tile.psums.x_step            <= control_regs[1][27:16]; //12
-                dma_params.tile.psums.y_step[3:0]       <= control_regs[1][31:28]; //24
+                // REG 1 - 2x16 bits
+                dma_params.tile.c_lim                   <= control_regs[1][15:0];
+                dma_params.tile.k_lim                   <= control_regs[1][31:16];
 
-                // REG 2
-                dma_params.tile.psums.y_step[23:4]      <= control_regs[2][19:0];
-                dma_params.tile.psums.k_step[11:0]      <= control_regs[2][31:20]; //24
+                // REGs 2-N 1x32 bits
+                dma_params.tile.psums.x_step            <= control_regs[2][31:0];
+                dma_params.tile.psums.y_step            <= control_regs[3][31:0];
+                dma_params.tile.psums.k_step            <= control_regs[4][31:0];
+                dma_params.tile.ifmaps.x_step           <= control_regs[5][31:0];
+                dma_params.tile.ifmaps.y_step           <= control_regs[6][31:0];
+                dma_params.tile.ifmaps.c_step           <= control_regs[7][31:0];
+                dma_params.tile.weights.k_step          <= control_regs[8][31:0];
+                dma_params.tile.weights.c_step          <= control_regs[9][31:0];
+                dma_params.dma.ifmaps.y_lim             <= control_regs[10][31:0];
+                dma_params.dma.ifmaps.c_lim             <= control_regs[11][31:0];
+                dma_params.dma.psums.y_step             <= control_regs[12][31:0];
+                dma_params.dma.psums.k_step             <= control_regs[13][31:0];
+                dma_params.dma.ifmaps.y_step            <= control_regs[14][31:0];
+                dma_params.dma.ifmaps.c_step            <= control_regs[15][31:0];
+                dma_params.dma.weights.w_step           <= control_regs[16][31:0];
+                dma_params.dma.ifmaps.ett               <= control_regs[17][31:0];
+                start_SRAMA_addr                        <= control_regs[18][31:0];
+                start_SRAMB_addr                        <= control_regs[19][31:0];
+                start_SRAMC_addr                        <= control_regs[20][31:0];
 
-                // REG 3
-                dma_params.tile.psums.k_step[23:12]     <= control_regs[3][11:0]; //24
-                dma_params.tile.ifmaps.x_step           <= control_regs[3][23:12]; //12
-                dma_params.tile.ifmaps.y_step[7:0]      <= control_regs[3][31:24]; //24
-
-                // REG 4
-                dma_params.tile.ifmaps.y_step[23:8]     <= control_regs[4][15:0];
-                dma_params.tile.ifmaps.c_step[15:0]     <= control_regs[4][31:16]; //24
-
-                // REG 5
-                dma_params.tile.ifmaps.c_step[23:16]    <= control_regs[5][7:0]; //24
-                dma_params.tile.weights.k_step          <= control_regs[5][27:8]; //20
-                dma_params.tile.weights.c_step[3:0]    <= control_regs[5][31:28]; //16
-
-                // REG 6
-                dma_params.tile.weights.c_step[15:4]   <= control_regs[6][11:0];
-                dma_params.dma.ifmaps.y_lim             <= control_regs[6][23:12]; //12
-                dma_params.dma.ifmaps.c_lim[7:0]        <= control_regs[6][31:24]; //12
-
-                // REG 7
-                dma_params.dma.ifmaps.c_lim[11:8]       <= control_regs[7][3:0]; //12
-                dma_params.dma.psums.y_step             <= control_regs[7][15:4]; //12
-                dma_params.dma.psums.k_step[15:0]       <= control_regs[7][31:16]; //24
-
-                // REG 8
-                dma_params.dma.psums.k_step[23:16]      <= control_regs[8][7:0];
-                dma_params.dma.ifmaps.y_step            <= control_regs[8][19:8]; //12
-                dma_params.dma.ifmaps.c_step[11:0]      <= control_regs[8][31:20]; //24
-
-                // REG 9
-                dma_params.dma.ifmaps.c_step[23:12]     <= control_regs[9][11:0]; //24
-                dma_params.dma.weights.w_step           <= control_regs[9][23:12]; //12
-                dma_params.dma.ifmaps.ett[7:0]          <= control_regs[9][31:24]; //12
-
-                // REG 10
-                dma_params.dma.ifmaps.ett[23:8]         <= control_regs[10][15:0];
-                start_SRAMA_addr[15:0]                  <= control_regs[10][31:16];
-
-                // REG 11
-                start_SRAMA_addr[31:16]                 <= control_regs[11][15:0];
-                start_SRAMB_addr[15:0]                  <= control_regs[11][31:16];
-
-                // REG 12
-                start_SRAMB_addr[31:16]                 <= control_regs[12][15:0];
-                start_SRAMC_addr[15:0]                  <= control_regs[12][31:16];
-
-                // REG 13
-                start_SRAMC_addr[31:16]                 <= control_regs[13][15:0];
-                loop_order                              <= control_regs[13][17:16];
-                stand_alone                             <= control_regs[13][18];
-                stand_alone_keep_A                      <= control_regs[13][19];
-                stand_alone_keep_B                      <= control_regs[13][20];
-                stand_alone_keep_C                      <= control_regs[13][21];
-                if (control_regs[13][18]) begin
-                    start                               <= !control_regs[13][22];
+                // REG N+1 - Control bits
+                loop_order                              <= control_regs[21][17:16];
+                stand_alone                             <= control_regs[21][18];
+                stand_alone_keep_A                      <= control_regs[21][19];
+                stand_alone_keep_B                      <= control_regs[21][20];
+                stand_alone_keep_C                      <= control_regs[21][21];
+                if (control_regs[21][18]) begin
+                    start                               <= !control_regs[21][22];
                 end
-                Cw_eq                                   <= control_regs[13][23];
-                Ch_eq                                   <= control_regs[13][24];
-                Ck_eq                                   <= control_regs[13][25];
+                Cw_eq                                   <= control_regs[21][23];
+                Ch_eq                                   <= control_regs[21][24];
+                Ck_eq                                   <= control_regs[21][25];
                 start_wresp_sync                        <= 1'b1;
+                start_dma_controller                    <= !control_regs[21][18];
 
-                start_dma_controller                    <= !control_regs[13][18];
-                
-                WXfer_op                                <= control_regs[13][31];
+                WXfer_op                                <= control_regs[21][31];
 
                 state <= SEND_ARGS;
             end

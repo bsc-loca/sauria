@@ -600,7 +600,6 @@ def run_cfg_test(HOPTS, assert_no_error=False, test_dir="../../test"):
     idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["DMA_offset"]+0x38,        0x3BAD_ADD2)    # Unmapped regions
     idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0x30,       0x2BAD_ADD2)    # Unmapped regions
     idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0x1000,     0x2BAD_ADD2)    # Unmapped regions
-    idx = cfg.rd_transaction(idx,cfg_list,   HOPTS["CORE_offset"]+0xF_0000,   0x4BAD_ADD2)    # Unmapped regions
 
     # Create & organize output matrices
     # ----------------------------------

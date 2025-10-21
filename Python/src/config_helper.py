@@ -409,72 +409,49 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     dma_ifmaps_c_step = Ah*Aw
 
     # Set 64-bit arguments to be passed to Picos
-    args = [0]*(14 + N_REGS)
+    args = [0]*(22 + N_REGS)
 
-    args[0] = set_bits(args[0], 11, 0,  tile_x_lim)
-    args[0] = set_bits(args[0], 23, 12, tile_y_lim)
-    args[0] = set_bits(args[0], 31, 24, tile_c_lim)
+    args[0] = set_bits(args[0], 15, 0,  tile_x_lim)
+    args[0] = set_bits(args[0], 31, 16, tile_y_lim)
 
-    args[1] = set_bits(args[1], 3, 0, tile_c_lim >> 8)
-    args[1] = set_bits(args[1], 15, 4, tile_k_lim)
-    args[1] = set_bits(args[1], 27, 16, tile_psums_x_step)
-    args[1] = set_bits(args[1], 31, 28, tile_psums_y_step)
+    args[1] = set_bits(args[1], 15, 0,  tile_c_lim)
+    args[1] = set_bits(args[1], 31, 16, tile_k_lim)
 
-    args[2] = set_bits(args[2], 19, 0,  tile_psums_y_step >> 4)
-    args[2] = set_bits(args[2], 31, 20, tile_psums_k_step)
+    args[2] = set_bits(args[2], 31, 0, tile_psums_x_step)
+    args[3] = set_bits(args[3], 31, 0, tile_psums_y_step)
+    args[4] = set_bits(args[4], 31, 0, tile_psums_k_step)
+    args[5] = set_bits(args[5], 31, 0, tile_ifmaps_x_step)
+    args[6] = set_bits(args[6], 31, 0, tile_ifmaps_y_step)
+    args[7] = set_bits(args[7], 31, 0, tile_ifmaps_c_step)
+    args[8] = set_bits(args[8], 31, 0, tile_weights_k_step)
+    args[9] = set_bits(args[9], 31, 0, tile_weights_c_step)
+    args[10] = set_bits(args[10], 31, 0, dma_ifmaps_y_lim)
+    args[11] = set_bits(args[11], 31, 0, dma_ifmaps_c_lim)
+    args[12] = set_bits(args[12], 31, 0, dma_psums_y_step)
+    args[13] = set_bits(args[13], 31, 0, dma_psums_k_step)
+    args[14] = set_bits(args[14], 31, 0, dma_ifmaps_y_step)
+    args[15] = set_bits(args[15], 31, 0, dma_ifmaps_c_step)
+    args[16] = set_bits(args[16], 31, 0, dma_weights_w_step)
+    args[17] = set_bits(args[17], 31, 0, dma_ifmaps_ett)
+    args[18] = set_bits(args[18], 31, 0, dram_base_addresses[0])
+    args[19] = set_bits(args[19], 31, 0, dram_base_addresses[1])
+    args[20] = set_bits(args[20], 31, 0, dram_base_addresses[2])
 
-    args[3] = set_bits(args[3], 11, 0, tile_psums_k_step >> 12)
-    args[3] = set_bits(args[3], 23, 12, tile_ifmaps_x_step)
-    args[3] = set_bits(args[3], 31, 24, tile_ifmaps_y_step)
-
-    args[4] = set_bits(args[4], 15, 0,  tile_ifmaps_y_step >> 8)
-    args[4] = set_bits(args[4], 31, 16, tile_ifmaps_c_step)
-
-    args[5] = set_bits(args[5], 7, 0, tile_ifmaps_c_step >> 16)
-    args[5] = set_bits(args[5], 27, 8, tile_weights_k_step)
-    args[5] = set_bits(args[5], 31, 28, tile_weights_c_step)
-
-    args[6] = set_bits(args[6], 11, 0,  tile_weights_c_step >> 4)
-    args[6] = set_bits(args[6], 23, 12, dma_ifmaps_y_lim)
-    args[6] = set_bits(args[6], 31, 24, dma_ifmaps_c_lim)
-
-    args[7] = set_bits(args[7], 3, 0, dma_ifmaps_c_lim >> 8)
-    args[7] = set_bits(args[7], 15, 4, dma_psums_y_step)
-    args[7] = set_bits(args[7], 31, 16, dma_psums_k_step)
-
-    args[8] = set_bits(args[8], 7,  0,  dma_psums_k_step >> 16)
-    args[8] = set_bits(args[8], 19, 8,  dma_ifmaps_y_step)
-    args[8] = set_bits(args[8], 31, 20, dma_ifmaps_c_step)
-
-    args[9] = set_bits(args[9], 11, 0, dma_ifmaps_c_step >> 12)
-    args[9] = set_bits(args[9], 23, 12, dma_weights_w_step)
-    args[9] = set_bits(args[9], 31, 24, dma_ifmaps_ett)
-
-    args[10] = set_bits(args[10], 15, 0,  dma_ifmaps_ett >> 8)
-    args[10] = set_bits(args[10], 31, 16, dram_base_addresses[0])
-
-    args[11] = set_bits(args[11], 15, 0, dram_base_addresses[0] >> 16)
-    args[11] = set_bits(args[11], 31, 16, dram_base_addresses[1])
-
-    args[12] = set_bits(args[12], 15, 0,  dram_base_addresses[1] >> 16)
-    args[12] = set_bits(args[12], 31, 16, dram_base_addresses[2])
-
-    args[13] = set_bits(args[13], 15, 0, dram_base_addresses[2] >> 16)
-    args[13] = set_bits(args[13], 17, 16, loop_order)
-    args[13] = set_bits(args[13], 18, 18, 0)              #stand alone
-    args[13] = set_bits(args[13], 19, 19, 0)              #keep A
-    args[13] = set_bits(args[13], 20, 20, 0)              #keep B
-    args[13] = set_bits(args[13], 21, 21, 0)              #keep C
-    args[13] = set_bits(args[13], 22, 22, 0)              #disable start
-    args[13] = set_bits(args[13], 23, 23, Cw == Cw_til)
-    args[13] = set_bits(args[13], 24, 24, Ch == Ch_til)
-    args[13] = set_bits(args[13], 25, 25, Ck_eq)
-    args[13] = set_bits(args[13], 31, 31, WXfer_op)
+    args[21] = set_bits(args[21], 17, 16, loop_order)
+    args[21] = set_bits(args[21], 18, 18, 0)              #stand alone
+    args[21] = set_bits(args[21], 19, 19, 0)              #keep A
+    args[21] = set_bits(args[21], 20, 20, 0)              #keep B
+    args[21] = set_bits(args[21], 21, 21, 0)              #keep C
+    args[21] = set_bits(args[21], 22, 22, 0)              #disable start
+    args[21] = set_bits(args[21], 23, 23, Cw == Cw_til)
+    args[21] = set_bits(args[21], 24, 24, Ch == Ch_til)
+    args[21] = set_bits(args[21], 25, 25, Ck_eq)
+    args[21] = set_bits(args[21], 31, 31, WXfer_op)
     
     # Set SAURIA regs, which are already packed and can span a variable number of regs
     sauria_acc_args = sauria_regs[:,1]
     
-    args[14:] = sauria_acc_args
+    args[22:] = sauria_acc_args
 
     return args
 

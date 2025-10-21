@@ -73,7 +73,7 @@ module sauria_tester(
     localparam CFG_AXI_DATA_WIDTH    = 32;
     localparam CFG_AXI_ADDR_WIDTH    = 32;
 
-    localparam DATA_AXI_DATA_WIDTH    = 128;
+    localparam DATA_AXI_DATA_WIDTH    = 1024;
     localparam DATA_AXI_ADDR_WIDTH    = 32;
     localparam DATA_AXI_ID_WIDTH      = 4;
 

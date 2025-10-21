@@ -381,7 +381,7 @@ def get_controller_regs(CONV, sauria_regs, N_REGS, dram_base_addresses, loop_ord
     if WXfer_op:
         tile_weights_k_step = Ck_til*Bw*Bh*Ac
         tile_weights_c_step = Ck_til*Bw*Bh*Ac_til
-        dma_weights_w_step = Ck     # Meaning is different!
+        dma_weights_w_step = Ck_til     # Meaning is different!
         Ck_eq = True
     else:
         tile_weights_k_step = Ck_til

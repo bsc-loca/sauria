@@ -2,7 +2,7 @@
 
 SAURIA is a Convolutional Neural Network (CNN) accelerator based on an output stationary (OS) systolic array with on-chip, on-the-fly convolution lowering, written entirely in SystemVerilog. 
 
-The accelerator can natively compute convolution and general matrix-matrix multiplication (GEMM) operations of any shape and size. The architecture is parametric and can be configured to use different systolic array shapes and sizes, local memory shapes, and arithmetic formats, but it has been tested extensively using FP16 arithmetic and an array of shape 8x16.
+The accelerator can natively compute convolution and general matrix-matrix multiplication (GEMM) operations of any shape and size. The architecture is parametric and can be configured to use different systolic array shapes and sizes, local memory shapes, and arithmetic formats, but it has been tested extensively using FP16 arithmetic and an array of shape 8x16 (128 PEs).
 
 Maintainer: Jordi Fornt Mas (jordi.fornt@bsc.es)
 
@@ -27,58 +27,23 @@ git submodule update --init --recursive
 
 SAURIA can be emulated using Verilator v4.224. We have observed issues with older and newer versions, so we recommend using a local installation as described below. A testbench for simulation with commercial RTL simulators (e.g. Synopsys VCS or Questa) is also provided.
 
-To install Verilator v4.224 locally, run:
+Before running any experiments, make sure to execute the setup script. The first time, it will automatically install the Python virtual environment with all dependencies needed to use the repo.
 
 ```bash
 source setup.sh
+```
+
+To install Verilator v4.224 locally, run:
+
+```bash
 cd tools/
 source install_verilator.sh
 ```
 
-To use the Python script that generates random stimuli for the simulations, install the required packages into your Python environment by using pip:
-
-```bash
-pip install -r Python/requirements_pip.txt
-```
-
-Or, alternatively, using Conda:
-
-```bash
-conda install --file Python/requirements_pip.txt
-```
-
-The option to set up a Python virtual environment is also available:
-
-```bash
-source setup.sh
-cd Python
-source install_venv.sh
-```
-
 ## Running Simulations
 
-First, we generate a set of random convolutions and GEMMs using Python:
+We provide an example Jupyter Notebook explaining step by step how to perform simulations with the repo, which you can find [here](Python/notebooks/example_basic.ipynb) (`Python/notebooks/example_basic.ipynb`).
 
-```bash
-source setup.sh
-cd Python
-source generate_stimuli.sh bmk_small
-```
-
-Then, we can move to the test directory to compile and run the emulated accelerator using verilator:
-
-```bash
-cd ../test/verilator/
-source compile_sauria.sh
-source run_sauria_test.sh bmk_small
-```
-
-To visualize the waveforms of the simulation we have to generate a VCD dump and read it using GTKWave:
-
-```bash
-source run_sauria_test.sh bmk_small vcd
-source display_sauria_waves.sh new_test.vcd gtk_waves/sauria_8x16_fp16.gtkw
-```
 ## Publication
 
 If you use SAURIA in your work, you can cite the following paper:

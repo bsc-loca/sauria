@@ -1,6 +1,5 @@
 stages:
   - compile
-  - stim_gen
   - test
 
 variables:
@@ -52,7 +51,6 @@ workflow:
   image: registry.gitlab.bsc.es/hwdesign/containerhub/verilator:latest
   before_script:
     - *global_before_script
-    - source ${CI_PROJECT_DIR}/test/ci/setup.sh
 
 default:
   before_script:

@@ -22,8 +22,6 @@ Jordi Fornt <jfornt@bsc.es>
 import numpy as np
 import sys
 
-sys.path.insert(1, './../')
-
 def booth_multiplier(a, b, N_bits=16, m=16, approx=''):
     
     if (np.isscalar(a) or np.isscalar(b)):

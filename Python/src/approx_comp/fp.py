@@ -22,10 +22,11 @@ Jordi Fornt <jfornt@bsc.es>
 import numpy as np
 import sys
 
-from model.approx.multipliers import generic_multiplier
-from model.approx.adders import generic_adder
+sys.path.insert(1, './../../')
+from src.approx_comp.multipliers import generic_multiplier
+from src.approx_comp.adders import generic_adder
 
-from helpers import drac_sa_top_helper as dsth
+from src import data_helper as dh
 
 
 def FP_Madd(a, b, c, MANT_bits=10, N_bits=16, MulType=0, m=16, AdderType=0, A=0, rounding='RNE'):
@@ -41,9 +42,9 @@ def FP_Madd(a, b, c, MANT_bits=10, N_bits=16, MulType=0, m=16, AdderType=0, A=0,
     # Conversion (one-by-one, unfortunately)
     # ***************************************
     
-    [s_a, e_a, m_a] = dsth.val_to_FP(a, MANT_bits, E_bits, e_bias, expanded=True)
-    [s_b, e_b, m_b] = dsth.val_to_FP(b, MANT_bits, E_bits, e_bias, expanded=True)
-    [s_c, e_c, m_c] = dsth.val_to_FP(c, MANT_bits, E_bits, e_bias, expanded=True)
+    [s_a, e_a, m_a] = dh.encode_FP(a, MANT_bits, E_bits, e_bias, expanded=True)
+    [s_b, e_b, m_b] = dh.encode_FP(b, MANT_bits, E_bits, e_bias, expanded=True)
+    [s_c, e_c, m_c] = dh.encode_FP(c, MANT_bits, E_bits, e_bias, expanded=True)
     
     # a_p = 0xb326
     # b_p = 0x3800
@@ -281,4 +282,4 @@ def FP_Madd(a, b, c, MANT_bits=10, N_bits=16, MulType=0, m=16, AdderType=0, A=0,
     
     final_result_packed = (final_sign<<(N_bits-1)) + (final_exp<<MANT_bits) + final_mant
     
-    return final_result_packed, [final_sign, final_exp, final_mant], dsth.FP_to_val(final_result_packed, MANT_bits, E_bits)
+    return final_result_packed, [final_sign, final_exp, final_mant], dh.decode_FP(final_result_packed, MANT_bits, E_bits)

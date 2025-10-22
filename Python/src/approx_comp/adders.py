@@ -22,8 +22,6 @@ Jordi Fornt <jfornt@bsc.es>
 import numpy as np
 import sys
 
-sys.path.insert(1, './../')
-
 def generic_adder(a, b, cin, AdderType=0, N_bits=16, A=0, remove_carry=True, signed=True):
 
     # ADDER TYPES:

@@ -24,24 +24,24 @@ module sauria_dma_pointer_generator (
     input advance,
     input df_ctrl_pkg::TilePointers p,
     input [1:0] loop_order,
-    output reg [23:0] ifmap_xcounter,
-    output reg [23:0] ifmap_ycounter,
-    output reg [23:0] ifmap_ccounter,
-    output reg [23:0] psums_xcounter,
-    output reg [23:0] psums_ycounter,
-    output reg [23:0] psums_kcounter,
-    output reg [23:0] weights_ccounter,
-    output reg [23:0] weights_kcounter,
+    output reg [31:0] ifmap_xcounter,
+    output reg [31:0] ifmap_ycounter,
+    output reg [31:0] ifmap_ccounter,
+    output reg [31:0] psums_xcounter,
+    output reg [31:0] psums_ycounter,
+    output reg [31:0] psums_kcounter,
+    output reg [31:0] weights_ccounter,
+    output reg [31:0] weights_kcounter,
     output reg ifmaps_change,
     output reg psums_change,
     output reg weights_change,
     output last_iter
 );
 
-    reg [11:0] x;
-    reg [11:0] y;
-    reg [11:0] c;
-    reg [11:0] k;
+    reg [15:0] x;
+    reg [15:0] y;
+    reg [15:0] c;
+    reg [15:0] k;
 
     wire [3:0] overflow;
 
@@ -78,42 +78,42 @@ module sauria_dma_pointer_generator (
             psums_change <= 1'b0;
             weights_change <= 1'b0;
             if (spatial_cond) begin
-                if (p.x_lim != 12'd0 || p.y_lim != 12'd0) begin
+                if (p.x_lim != 16'd0 || p.y_lim != 16'd0) begin
                     ifmaps_change <= 1'b1;
                     psums_change <= 1'b1;
                 end
                 if (overflow[0]) begin
-                    x <= 12'd0;
-                    ifmap_xcounter <= 24'd0;
-                    psums_xcounter <= 24'd0;
+                    x <= 16'd0;
+                    ifmap_xcounter <= '0;
+                    psums_xcounter <= '0;
                 end else begin
-                    x <= x + 12'd1;
+                    x <= x + 16'd1;
                     ifmap_xcounter <= ifmap_xcounter + p.ifmaps.x_step;
                     psums_xcounter <= psums_xcounter + p.psums.x_step;
                 end
                 if (overflow[0]) begin
                     if (overflow[1]) begin
-                        y <= 12'd0;
-                        ifmap_ycounter <= 24'd0;
-                        psums_ycounter <= 24'd0;
+                        y <= 16'd0;
+                        ifmap_ycounter <= '0;
+                        psums_ycounter <= '0;
                     end else begin
-                        y <= y + 12'd1;
+                        y <= y + 16'd1;
                         ifmap_ycounter <= ifmap_ycounter + p.ifmaps.y_step;
                         psums_ycounter <= psums_ycounter + p.psums.y_step;
                     end
                 end
             end
             if (c_cond) begin
-                if (p.c_lim != 12'd0) begin
+                if (p.c_lim != 16'd0) begin
                     ifmaps_change <= 1'b1;
                     weights_change <= 1'b1;
                 end
                 if (overflow[2]) begin
-                    c <= 12'd0;
-                    ifmap_ccounter <= 24'd0;
-                    weights_ccounter <= 24'd0;
+                    c <= 16'd0;
+                    ifmap_ccounter <= '0;
+                    weights_ccounter <= '0;
                 end else begin
-                    c <= c + 12'd1;
+                    c <= c + 16'd1;
                     ifmap_ccounter <= ifmap_ccounter + p.ifmaps.c_step;
                     weights_ccounter <= weights_ccounter + p.weights.c_step;
                 end
@@ -124,11 +124,11 @@ module sauria_dma_pointer_generator (
                     weights_change <= 1'b1;
                 end
                 if (overflow[3]) begin
-                    k <= 12'd0;
-                    psums_kcounter <= 24'd0;
-                    weights_kcounter <= 24'd0;
+                    k <= 16'd0;
+                    psums_kcounter <= '0;
+                    weights_kcounter <= '0;
                 end else begin
-                    k <= k + 12'd1;
+                    k <= k + 16'd1;
                     psums_kcounter <= psums_kcounter + p.psums.k_step;
                     weights_kcounter <= weights_kcounter + p.weights.k_step;
                 end
@@ -136,18 +136,18 @@ module sauria_dma_pointer_generator (
         end
 
         if (rst) begin
-            x <= 12'd0;
-            y <= 12'd0;
-            c <= 12'd0;
-            k <= 12'd0;
-            ifmap_xcounter <= 24'd0;
-            ifmap_ycounter <= 24'd0;
-            ifmap_ccounter <= 24'd0;
-            psums_xcounter <= 24'd0;
-            psums_ycounter <= 24'd0;
-            psums_kcounter <= 24'd0;
-            weights_ccounter <= 24'd0;
-            weights_kcounter <= 24'd0;
+            x <= '0;
+            y <= '0;
+            c <= '0;
+            k <= '0;
+            ifmap_xcounter <= '0;
+            ifmap_ycounter <= '0;
+            ifmap_ccounter <= '0;
+            psums_xcounter <= '0;
+            psums_ycounter <= '0;
+            psums_kcounter <= '0;
+            weights_ccounter <= '0;
+            weights_kcounter <= '0;
             ifmaps_change <= 1'b1;
             psums_change <= 1'b1;
             weights_change <= 1'b1;

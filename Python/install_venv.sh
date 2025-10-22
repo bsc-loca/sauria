@@ -11,8 +11,9 @@ if [ -d "$ENV_DIR" ]; then
     exit 0
 fi
 
-echo "Creating virtual environment using Python 3.9 (change version if desired, but some required packages might not be compatible with that specific version of Python)..."
-python3.9 -m venv "$ENV_DIR"
+echo "Creating virtual environment (tested using Python 3.9, change version if desired, but some required packages might not be compatible with that specific version of Python)..."
+python3 --version
+python3 -m venv "$ENV_DIR"
 
 echo "Activating the virtual environment..."
 source "$ENV_DIR/bin/activate"

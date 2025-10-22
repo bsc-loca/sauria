@@ -23,8 +23,6 @@ import numpy as np
 import sys
 import abm
 
-sys.path.insert(1, './../')
-
 #%%
 
 np.random.seed(29)

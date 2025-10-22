@@ -75,15 +75,6 @@ module sauria_logic #(
 // DERIVED PARAMETERS
 // --------------------
 
-// Operands per data word
-localparam int SRAMA_N = SRAMA_W/sauria_pkg::IA_W;
-localparam int SRAMB_N = SRAMB_W/sauria_pkg::IB_W;
-
-// Counter index width: address width + word offset + 1
-localparam int ACT_IDX_W = ADRA_W + $clog2(SRAMA_N) + 1;
-localparam int WEI_IDX_W = ADRB_W + $clog2(SRAMB_N) + 1;
-localparam int OUT_IDX_W = ADRC_W + $clog2(SRAMC_N) + 1;
-
 // Processing Element latency
 localparam int PE_LAT = sauria_pkg::STAGES_MUL + sauria_pkg::INTERMEDIATE_PIPELINE_STAGE + sauria_pkg::ZERO_GATING_MULT;
 
@@ -102,9 +93,9 @@ logic [4:0]                                         cg_out_status;
 
 // Towards Main Controller
 logic                                               mc_start;
-logic [ACT_IDX_W-1:0]                               mc_incntlim;
-logic [OUT_IDX_W-1:0]                               mc_act_reps;
-logic [OUT_IDX_W-1:0]                               mc_wei_reps;
+logic [sauria_pkg::ACT_IDX_W-1:0]                   mc_incntlim;
+logic [sauria_pkg::OUT_IDX_W-1:0]                   mc_act_reps;
+logic [sauria_pkg::OUT_IDX_W-1:0]                   mc_wei_reps;
 logic                                               mc_outbuf_done;
 logic                                               mc_shift_done;
 logic                                               mc_finalwrite;
@@ -121,16 +112,16 @@ logic                                               mc_wei_stall;
 
 // Towards Activation Feeder
 logic [0:sauria_pkg::Y-1]                           af_rows_active;
-logic [ACT_IDX_W-1:0]		                        af_xlim;
-logic [ACT_IDX_W-1:0]		                        af_xstep;
-logic [ACT_IDX_W-1:0]		                        af_ylim;
-logic [ACT_IDX_W-1:0]		                        af_ystep;
-logic [ACT_IDX_W-1:0]		                        af_chlim;
-logic [ACT_IDX_W-1:0]		                        af_chstep;
-logic [ACT_IDX_W-1:0]		                        af_til_xlim;
-logic [ACT_IDX_W-1:0]		                        af_til_xstep;
-logic [ACT_IDX_W-1:0]		                        af_til_ylim;
-logic [ACT_IDX_W-1:0]		                        af_til_ystep;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_xlim;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_xstep;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_ylim;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_ystep;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_chlim;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_chstep;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_til_xlim;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_til_xstep;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_til_ylim;
+logic [sauria_pkg::ACT_IDX_W-1:0]		            af_til_ystep;
 logic					                            af_act_feeder_en;
 logic                                               af_act_feeder_clear;
 logic                                               af_act_valid;
@@ -147,12 +138,12 @@ logic [0:sauria_pkg::DILP_W-1]	                    af_Dil_pat;
 // Towards Weight Feeder
 logic [0:sauria_pkg::X-1]                           wf_cols_active;
 logic                                               wf_waligned;
-logic [WEI_IDX_W-1:0]		                        wf_wlim;
-logic [WEI_IDX_W-1:0]		                        wf_wstep;
-logic [WEI_IDX_W-1:0]		                        wf_auxlim;
-logic [WEI_IDX_W-1:0]		                        wf_auxstep;
-logic [WEI_IDX_W-1:0]		                        wf_til_klim;
-logic [WEI_IDX_W-1:0]		                        wf_til_kstep;
+logic [sauria_pkg::WEI_IDX_W-1:0]		            wf_wlim;
+logic [sauria_pkg::WEI_IDX_W-1:0]		            wf_wstep;
+logic [sauria_pkg::WEI_IDX_W-1:0]		            wf_auxlim;
+logic [sauria_pkg::WEI_IDX_W-1:0]		            wf_auxstep;
+logic [sauria_pkg::WEI_IDX_W-1:0]		            wf_til_klim;
+logic [sauria_pkg::WEI_IDX_W-1:0]		            wf_til_kstep;
 logic					                            wf_wei_feeder_en;
 logic                                               wf_wei_feeder_clear;
 logic                                               wf_wei_valid;
@@ -166,15 +157,15 @@ logic                                               wf_wei_cswitch;
 
 // Towards Output Buffer
 logic            		                            ob_preload_en;
-logic [OUT_IDX_W-1:0]		                        ob_ncontexts;
-logic [OUT_IDX_W-1:0]		                        ob_cxlim;
-logic [OUT_IDX_W-1:0]		                        ob_cxstep;
-logic [OUT_IDX_W-1:0]		                        ob_cklim;
-logic [OUT_IDX_W-1:0]		                        ob_ckstep;
-logic [OUT_IDX_W-1:0]		                        ob_til_cylim;
-logic [OUT_IDX_W-1:0]		                        ob_til_cystep;
-logic [OUT_IDX_W-1:0]		                        ob_til_cklim;
-logic [OUT_IDX_W-1:0]		                        ob_til_ckstep;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_ncontexts;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_cxlim;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_cxstep;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_cklim;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_ckstep;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_til_cylim;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_til_cystep;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_til_cklim;
+logic [sauria_pkg::OUT_IDX_W-1:0]		            ob_til_ckstep;
 logic					                            ob_outbuf_start;
 logic                                               ob_outbuf_reset;
 logic [sauria_pkg::PARAMS_W-1:0]                    ob_inactive_cols;
@@ -203,9 +194,9 @@ config_regs #(
         .IF_ADR_W   (IF_ADR_W),
         .X          (sauria_pkg::X),
         .Y          (sauria_pkg::Y),
-        .ACT_IDX_W  (ACT_IDX_W),
-        .WEI_IDX_W  (WEI_IDX_W),
-        .OUT_IDX_W  (OUT_IDX_W),
+        .ACT_IDX_W  (sauria_pkg::ACT_IDX_W),
+        .WEI_IDX_W  (sauria_pkg::WEI_IDX_W),
+        .OUT_IDX_W  (sauria_pkg::OUT_IDX_W),
         .TH_W       (sauria_pkg::TH_W),
         .PARAMS_W   (sauria_pkg::PARAMS_W),
         .DILP_W     (sauria_pkg::DILP_W)
@@ -282,8 +273,8 @@ config_regs #(
 main_controller #(
         .X                  (sauria_pkg::X),
         .Y                  (sauria_pkg::Y),
-        .ACT_IDX_W          (ACT_IDX_W),
-        .OUT_IDX_W          (OUT_IDX_W),
+        .ACT_IDX_W          (sauria_pkg::ACT_IDX_W),
+        .OUT_IDX_W          (sauria_pkg::OUT_IDX_W),
         .ACT_FIFO_POSITIONS (sauria_pkg::ACT_FIFO_POSITIONS),
         .WEI_FIFO_POSITIONS (sauria_pkg::WEI_FIFO_POSITIONS),
         .PE_LAT             (PE_LAT),
@@ -347,7 +338,7 @@ ifmap_feeder #(
         .FIFO_POSITIONS (sauria_pkg::ACT_FIFO_POSITIONS),
         .IA_W           (sauria_pkg::IA_W),
         .SRAMA_W        (SRAMA_W),
-        .IDX_W          (ACT_IDX_W),
+        .IDX_W          (sauria_pkg::ACT_IDX_W),
         .ADRA_W         (ADRA_W),
         .DILP_W         (sauria_pkg::DILP_W),
         .PARAMS_W       (sauria_pkg::PARAMS_W),
@@ -400,7 +391,7 @@ wei_feeder #(
         .FIFO_POSITIONS (sauria_pkg::WEI_FIFO_POSITIONS),
         .IB_W           (sauria_pkg::IB_W),
         .SRAMB_W        (SRAMB_W),
-        .IDX_W          (WEI_IDX_W),
+        .IDX_W          (sauria_pkg::WEI_IDX_W),
         .ADRB_W         (ADRB_W),
         .PARAMS_W       (sauria_pkg::PARAMS_W)
     ) weight_feeder_i
@@ -445,7 +436,7 @@ psm_top #(
         .PARAMS_W   (sauria_pkg::PARAMS_W),
         .OC_W       (sauria_pkg::OC_W),
         .SRAMC_W    (SRAMC_W),
-        .IDX_W      (OUT_IDX_W),
+        .IDX_W      (sauria_pkg::OUT_IDX_W),
         .ADRC_W     (ADRC_W)
     ) psm_top_i
        (.i_clk          (i_clk),

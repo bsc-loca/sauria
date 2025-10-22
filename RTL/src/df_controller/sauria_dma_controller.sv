@@ -93,7 +93,7 @@ module sauria_dma_controller (
     reg [31:0] SRAMA_addr;
     reg [31:0] SRAMB_addr;
     reg [31:0] SRAMC_addr;
-    reg [14:0] local_SRAM_addr; //32KB SRAM
+    reg [31:0] local_SRAM_addr; //32KB SRAM
     reg first_tile;
     reg first_dma_iter;
     reg goto_sync_sauria;
@@ -109,28 +109,28 @@ module sauria_dma_controller (
     reg addr_sent;
     reg data_sent;
 
-    reg [23:0] ett;
-    wire [24:0] btt;
-    reg [23:0] ystep;
-    reg [23:0] zstep;
-    reg [23:0] ycounter;
-    reg [23:0] zcounter;
-    reg [23:0] y;
-    reg [23:0] z;
-    reg [23:0] ylim;
-    reg [23:0] zlim;
-    reg [23:0] y_incr;
-    reg [23:0] z_incr;
+    reg [31:0] ett;
+    wire [31:0] btt;
+    reg [31:0] ystep;
+    reg [31:0] zstep;
+    reg [31:0] ycounter;
+    reg [31:0] zcounter;
+    reg [31:0] y;
+    reg [31:0] z;
+    reg [31:0] ylim;
+    reg [31:0] zlim;
+    reg [31:0] y_incr;
+    reg [31:0] z_incr;
 
     reg advance;
-    wire [23:0] ifmap_xcounter;
-    wire [23:0] ifmap_ycounter;
-    wire [23:0] ifmap_ccounter;
-    wire [23:0] psums_xcounter;
-    wire [23:0] psums_ycounter;
-    wire [23:0] psums_kcounter;
-    wire [23:0] weights_kcounter;
-    wire [23:0] weights_ccounter;
+    wire [31:0] ifmap_xcounter;
+    wire [31:0] ifmap_ycounter;
+    wire [31:0] ifmap_ccounter;
+    wire [31:0] psums_xcounter;
+    wire [31:0] psums_ycounter;
+    wire [31:0] psums_kcounter;
+    wire [31:0] weights_kcounter;
+    wire [31:0] weights_ccounter;
     wire last_iter_sig;
     reg last_iter_reg;
     wire single_tile;
@@ -141,11 +141,11 @@ module sauria_dma_controller (
     reg last_ifmaps_change;
     reg last_weights_change;
 
-    reg [24:0] SRAMA_tile_offset;
-    reg [24:0] SRAMB_tile_offset;
-    reg [24:0] SRAMC_tile_offset;
-    reg [24:0] tmp_SRAMC_tile_offset;
-    reg [24:0] send_SRAMC_tile_offset;
+    reg [31:0] SRAMA_tile_offset;
+    reg [31:0] SRAMB_tile_offset;
+    reg [31:0] SRAMC_tile_offset;
+    reg [31:0] tmp_SRAMC_tile_offset;
+    reg [31:0] send_SRAMC_tile_offset;
 
     assign dma_axilite.arvalid = 1'b0;
     assign dma_axilite.araddr = 32'd0;
@@ -261,11 +261,11 @@ module sauria_dma_controller (
         case (state)
 
             IDLE: begin
-                local_SRAM_addr <= 15'd0;
-                ycounter <= 24'd0;
-                zcounter <= 24'd0;
-                y <= 24'd0;
-                z <= 24'd0;
+                local_SRAM_addr <= '0;
+                ycounter <= '0;
+                zcounter <= '0;
+                y <= '0;
+                z <= '0;
                 set_A_params();
                 addr <= INTERRUPT_MASK_REGISTER_OFFSET;
                 wdata[0] <= 1'b1; //writer interrupt enable
@@ -292,7 +292,7 @@ module sauria_dma_controller (
                     data_sent <= 1'b0;
                     case (addr)
                         INTERRUPT_MASK_REGISTER_OFFSET: begin
-                            wdata <= {7'd0, btt};
+                            wdata <= btt;
                             addr <= BTT_OFFSET;
                         end
                         BTT_OFFSET: begin
@@ -307,7 +307,7 @@ module sauria_dma_controller (
                                     wdata <= SRAMC_tile_offset + SRAMC_addr;
                                 end
                                 DMA_SEND_C: begin
-                                    wdata <= SRAMC_OFFSET + {15'd0, local_SRAM_addr};
+                                    wdata <= SRAMC_OFFSET + local_SRAM_addr;
                                 end
                             endcase
                             addr <= READER_START_ADDR_OFFSET;
@@ -315,13 +315,13 @@ module sauria_dma_controller (
                         READER_START_ADDR_OFFSET: begin
                             case (sub_state)
                                 DMA_BRING_A: begin
-                                    wdata <= SRAMA_OFFSET + {15'd0, local_SRAM_addr};
+                                    wdata <= SRAMA_OFFSET + local_SRAM_addr;
                                 end
                                 DMA_BRING_B: begin
-                                    wdata <= SRAMB_OFFSET + {15'd0, local_SRAM_addr};
+                                    wdata <= SRAMB_OFFSET + local_SRAM_addr;
                                 end
                                 DMA_BRING_C: begin
-                                    wdata <= SRAMC_OFFSET + {15'd0, local_SRAM_addr};
+                                    wdata <= SRAMC_OFFSET + local_SRAM_addr;
                                 end
                                 DMA_SEND_C: begin
                                     wdata <= SRAMC_tile_offset + SRAMC_addr;

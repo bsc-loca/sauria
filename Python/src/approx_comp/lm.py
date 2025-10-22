@@ -22,8 +22,6 @@ Jordi Fornt <jfornt@bsc.es>
 import numpy as np
 import sys
 
-sys.path.insert(1, './../')
-
 #%% Functions
 
 # LEADING ONE DETECTOR (LEADING ZERO COUNTER)

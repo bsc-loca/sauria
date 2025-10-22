@@ -37,8 +37,8 @@ module df_controller_top #(
     output              control_interrput_out
 );
 
-    // Params and signals
-    localparam N_REGS = df_ctrl_pkg::SAURIA_NARGS*2;
+    // Total number of registers (14 for controller + SAURIA registers)
+    localparam N_REGS = 22 + sauria_pkg::TOTAL_REGS_CON + sauria_pkg::TOTAL_REGS_ACT + sauria_pkg::TOTAL_REGS_WEI + sauria_pkg::TOTAL_REGS_OUT;
     localparam N_REGS_BITS = $clog2(N_REGS);
 
     logic start_d, start_q, start_q_prv, start_edge;

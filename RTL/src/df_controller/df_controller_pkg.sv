@@ -22,49 +22,49 @@
 package df_ctrl_pkg;
 
     typedef struct {
-        logic [11:0] x_step;
-        logic [23:0] y_step;
-        logic [23:0] k_step;
+        logic [31:0] x_step;
+        logic [31:0] y_step;
+        logic [31:0] k_step;
     } PsumsTilePointer;
 
     typedef struct {
-        logic [11:0] x_step;
-        logic [23:0] y_step;
-        logic [23:0] c_step;
+        logic [31:0] x_step;
+        logic [31:0] y_step;
+        logic [31:0] c_step;
     } IFmapsTilePointer;
 
     typedef struct {
-        logic [11:0] k_step;
-        logic [23:0] c_step;
+        logic [31:0] k_step;
+        logic [31:0] c_step;
     } WeightsTilePointer;
 
     typedef struct {
-        logic [23:0] ett;
-        logic [23:0] y_step;
-        logic [23:0] y_lim;
-        logic [23:0] k_step;
-        logic [11:0] k_lim;
+        logic [31:0] ett;
+        logic [31:0] y_step;
+        logic [31:0] y_lim;
+        logic [31:0] k_step;
+        logic [31:0] k_lim;
     } PsumsDMAPointer;
 
     typedef struct {
-        logic [23:0] ett;
-        logic [11:0] y_step;
-        logic [11:0] y_lim;
-        logic [23:0] c_step;
-        logic [11:0] c_lim;
+        logic [31:0] ett;
+        logic [31:0] y_step;
+        logic [31:0] y_lim;
+        logic [31:0] c_step;
+        logic [31:0] c_lim;
     } IFmapsDMAPointer;
 
     typedef struct {
-        logic [23:0] ett;
-        logic [11:0] w_step;
-        logic [23:0] w_lim;
+        logic [31:0] ett;
+        logic [31:0] w_step;
+        logic [31:0] w_lim;
     } WeightsDMAPointer;
 
     typedef struct {
-        logic [11:0] x_lim;
-        logic [11:0] y_lim;
-        logic [11:0] k_lim;
-        logic [11:0] c_lim;
+        logic [15:0] x_lim;
+        logic [15:0] y_lim;
+        logic [15:0] k_lim;
+        logic [15:0] c_lim;
         PsumsTilePointer psums;
         IFmapsTilePointer ifmaps;
         WeightsTilePointer weights;
@@ -81,10 +81,8 @@ package df_ctrl_pkg;
         DMAPointers dma;
     } DMAParams;
 
-    localparam SAURIA_NARGS = 17;
-
-    localparam A_BYTES = 2;
-    localparam B_BYTES = 2;
-    localparam C_BYTES = 2;
+    localparam A_BYTES = (`IA_W/8);
+    localparam B_BYTES = (`IB_W/8);
+    localparam C_BYTES = (`OC_W/8);
 
 endpackage

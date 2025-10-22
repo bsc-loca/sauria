@@ -5,6 +5,8 @@ base_dir = $(abspath .)
 tb_top = sauria_tester
 veri_opt_flags = -O2 -CFLAGS "-O2"
 
+version_file = $(RTL_DIR)/hw_versions/$(version).svh
+
 veri_flags = \
 	-DVERILATOR_GCC \
 	+define+$(arith) \
@@ -31,8 +33,9 @@ junk += Test-Sim
 
 all: verilator.log
 verilator.log:
+	echo $(version_file)
 	verilator --version
-	verilator --cc -F verilator_filelist.f $(veri_flags) $(veri_opt_flags) -o Test-Sim 2>&1 | tee $@
+	verilator --cc $(version_file) -F verilator_filelist.f $(veri_flags) $(veri_opt_flags) -o Test-Sim 2>&1 | tee $@
 	cp obj_dir/Test-Sim .
 
 junk += verilator.log

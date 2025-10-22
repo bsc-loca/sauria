@@ -22,10 +22,10 @@ Jordi Fornt <jfornt@bsc.es>
 import numpy as np
 import sys
 
-import model.approx.abm as abm
-import model.approx.bam as bam
-import model.approx.lm as lm 
-import model.approx.udm as udm
+import src.approx_comp.abm as abm
+import src.approx_comp.bam as bam
+import src.approx_comp.lm as lm 
+import src.approx_comp.udm as udm
 
 sys.path.insert(1, './../')
 

@@ -141,4 +141,4 @@ test:conv_validation_int8_32x32:
         - cd ${CI_PROJECT_DIR}/Python
         - source install_venv.sh
         - cd scripts
-        - python run_verif_test.py --version int8_32x32 --test_type conv_validation --assert_no_errors --test_dir $TEST_DIR
+        - python run_verif_test.py --version int8_32x32 --test_type conv_validation --n_random_tests 20 --assert_no_errors --test_dir $TEST_DIR

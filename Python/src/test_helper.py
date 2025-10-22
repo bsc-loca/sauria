@@ -668,7 +668,7 @@ def get_single_tile_info(TESTS):
 # TEST GENERATION
 # ------------------------------
 
-def generate_tests(TOPTS, HOPTS):
+def generate_tests(TOPTS, HOPTS, N_RANDOM_TESTS=70):
     
     LIMITS = get_conv_limits(HOPTS)
     
@@ -690,7 +690,7 @@ def generate_tests(TOPTS, HOPTS):
         # Randomly generated tests with heuristic
         temp_TESTS = gen_void_tests()
         sram_sizes = [HOPTS['MEMA_size'], HOPTS['MEMB_size'], HOPTS['MEMC_size']]
-        gen_random_tests(LIMITS, sram_sizes, temp_TESTS, HOPTS['X'], HOPTS['Y'], HOPTS['DILP_W'], HOPTS['PARAMS_W'], 32)
+        gen_random_tests(LIMITS, sram_sizes, temp_TESTS, HOPTS['X'], HOPTS['Y'], HOPTS['DILP_W'], HOPTS['PARAMS_W'], N_RANDOM_TESTS)
         
         # Extend random tests to several tiles
         extend_random_tests(TESTS, TILEINFO, temp_TESTS, 10)
@@ -706,7 +706,7 @@ def generate_tests(TOPTS, HOPTS):
         
         # Randomly generated tests with heuristic
         sram_sizes = [HOPTS['MEMA_size'], HOPTS['MEMB_size'], HOPTS['MEMC_size']]
-        gen_random_tests(LIMITS, sram_sizes, TESTS, HOPTS['X'], HOPTS['Y'], HOPTS['DILP_W'], HOPTS['PARAMS_W'], 70)
+        gen_random_tests(LIMITS, sram_sizes, TESTS, HOPTS['X'], HOPTS['Y'], HOPTS['DILP_W'], HOPTS['PARAMS_W'], N_RANDOM_TESTS)
     
         TILEINFO = get_single_tile_info(TESTS)
 

@@ -51,6 +51,7 @@ if __name__ == "__main__":
                                         \t* bmk_torture :         40 large convolutions with tiling\n \
                                         \t* power_estimation :    1 small convolution with high PE utilization for power estimation\n \
                                         \t* debug_test :          testing different memory accesses\n')
+    parser.add_argument('--n_random_tests', default=70, help='Number of randomly generated tests (applies only to --test_type conv_validation)')
 
     parser.add_argument('--print_statistics', action='store_true', help='Display performance statistics after every test (NOTE: these tests are meant to verify functionality, not to acheive high utilization)')
     parser.add_argument('--assert_no_errors', action='store_true', help='Stop and raise an error if any test fails')
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     SA = slib.get_sa_dict(HW_PARAMS)
 
     # Prepare tests
-    TESTS, TILEINFO, LIMITS = th.generate_tests(TOPTS, HW_PARAMS)
+    TESTS, TILEINFO, LIMITS = th.generate_tests(TOPTS, HW_PARAMS, int(args.n_random_tests))
 
     print("Starting test: {}".format(TOPTS['test_type']))
 

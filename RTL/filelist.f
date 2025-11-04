@@ -78,7 +78,6 @@ ${PULP_DIR}/axi/src/axi_isolate.sv
 ${PULP_DIR}/axi/src/axi_cdc_dst.sv
 ${PULP_DIR}/axi/src/axi_iw_converter.sv
 ${PULP_DIR}/axi/src/axi_id_prepend.sv
-${PULP_DIR}/axi/src/axi_delayer.sv
 ${PULP_DIR}/axi/src/axi_lite_dw_converter.sv
 ${PULP_DIR}/axi/src/axi_cdc.sv
 ${PULP_DIR}/axi/src/axi_lite_to_axi.sv
@@ -116,6 +115,8 @@ ${RTL_DIR}/src/dma/redma/src/w_engine.sv
 ${RTL_DIR}/src/axi/axi_lite_2ram.sv
 ${RTL_DIR}/src/axi/axi_full_2ram.sv
 ${RTL_DIR}/src/axi/axi_mem_slave.sv
+${RTL_DIR}/src/axi/axi_delayer.sv
+${RTL_DIR}/src/axi/axi_util_fifo_fallthrough.sv
 ${RTL_DIR}/src/axi/axi_lite_err_slv_intf.sv
 ${RTL_DIR}/src/common/cdc_sync_reg.sv
 ${RTL_DIR}/src/common/cnt_dualctx.sv

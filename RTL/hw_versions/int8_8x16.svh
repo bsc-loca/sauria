@@ -39,6 +39,11 @@
 `define SRAMC_DEPTH     1024        // SRAM C depth
 `define RF_C            0           // Set to 1 to partition SRAMC into several small Register Files
 
+// Memory subsystem & Bandwidth Configuration
+`define AXI_NOC_DATA_WIDTH  1024
+`define DRAM_BANDWIDTH      160     // In bits/cycle - IMPORTANT: DRAM_BANDWIDTH <= AXI_NOC_DATA_WIDTH
+`define DRAM_LATENCY        100     // In cycles
+
 // PE Configuration
 `define STAGES_MUL   0                      // Multiplier : Internal pipeline stages (Unsupported for FP)
 `define INTERMEDIATE_PIPELINE_STAGE   1     // Pipeline stage between multiplier and adder (1=True    0=False)

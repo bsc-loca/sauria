@@ -68,14 +68,17 @@ module sauria_tester(
 	// Parameters
 	// ------------ 
 
-    localparam DRAM_OFFSET               = 32'h0;
+    localparam DRAM_OFFSET           = 32'h0;
 
     localparam CFG_AXI_DATA_WIDTH    = 32;
     localparam CFG_AXI_ADDR_WIDTH    = 32;
 
-    localparam DATA_AXI_DATA_WIDTH    = 1024;
+    localparam DATA_AXI_DATA_WIDTH    = `AXI_NOC_DATA_WIDTH;
     localparam DATA_AXI_ADDR_WIDTH    = 32;
     localparam DATA_AXI_ID_WIDTH      = 4;
+
+    localparam DRAM_BANDWIDTH       = `DRAM_BANDWIDTH;
+    localparam DRAM_LATENCY         = `DRAM_LATENCY;
 
     localparam  BYTE = 8;
     localparam  CFG_AXI_BYTE_NUM = CFG_AXI_DATA_WIDTH/BYTE;
@@ -106,8 +109,8 @@ module sauria_tester(
 	`AXI_TYPEDEF_RESP_T(   dat_resp_t, dat_b_chan_t, dat_r_chan_t)
 
 	// AXI responses and requests
-	dat_req_t      axi_mem_req;
-	dat_resp_t     axi_mem_resp;
+	dat_req_t      axi_mem_req, lim_axi_mem_req;
+	dat_resp_t     axi_mem_resp, lim_axi_mem_resp;
 
     // AXI4 data interface
     AXI_BUS #(
@@ -236,6 +239,52 @@ module sauria_tester(
         .o_sauriaintr           (sauria_interrupt)
     );
 
+    // Mult factor of 10 ensures that 1st decimal place of BW divider will be respected.
+    // E.g. - If DATA_WIDTH=1024 and BW=70, then the division should be 14.628
+    // In this case we will have: Real_BW = 1024*(10//146) = 70.137 ~= 70
+    localparam      R_BW_MULT =     10;
+    localparam      R_BW_DIV =      int'(10*DATA_AXI_DATA_WIDTH/DRAM_BANDWIDTH);  // MUST BE *>=* THAN R_BW_MULT
+    localparam      W_BW_MULT =     10;
+    localparam      W_BW_DIV =      int'(10*DATA_AXI_DATA_WIDTH/DRAM_BANDWIDTH);  // MUST BE *>=* THAN W_BW_MULT
+
+    initial begin
+        assert (DATA_AXI_DATA_WIDTH >= DRAM_BANDWIDTH) else $fatal("DATA_AXI_DATA_WIDTH (%d) must be >= than DRAM_BANDWIDTH (%d) !!!", DATA_AXI_DATA_WIDTH, DRAM_BANDWIDTH);
+    end
+
+    // AXI Delayer - Enforces Bandwidth limitations
+    axi_delayer #(
+        .AxiAddrWidth               (DATA_AXI_ADDR_WIDTH),
+        .AxiDataWidth               (DATA_AXI_DATA_WIDTH),
+        .AxiIdWidth                 (DATA_AXI_ID_WIDTH),
+		.req_t                      (dat_req_t),
+		.resp_t                     (dat_resp_t),
+        .MAX_OUTSTANDING_AW         (1),
+        .MAX_OUTSTANDING_W          (1),
+        .MAX_OUTSTANDING_R          (1),
+        .READ_LATENCY               (DRAM_LATENCY),
+        .READ_BANDWIDTH_UP          (R_BW_MULT),
+        .READ_BANDWIDTH_DOWN        (R_BW_DIV-R_BW_MULT),
+        .READ_BANDWIDTH_RAND        (0),
+        .READ_BANDWIDTH_UP_PROB     (0),
+        .READ_BANDWIDTH_DOWN_PROB   (0),
+        .WRITE_LATENCY              (DRAM_LATENCY),
+        .WRITE_BANDWIDTH_UP         (W_BW_MULT),
+        .WRITE_BANDWIDTH_DOWN       (W_BW_DIV-W_BW_MULT),
+        .WRITE_BANDWIDTH_RAND       (0),
+        .WRITE_BANDWIDTH_UP_PROB    (0),
+        .WRITE_BANDWIDTH_DOWN_PROB  (0),
+        .TIMER_WIDTH                (32)
+    ) i_axi_delayer (
+		.clk            (clk_sys),
+		.arstn          (rstn_sys),
+
+		.s_axi_req_i    (axi_mem_req),
+		.s_axi_resp_o   (axi_mem_resp),
+
+		.m_axi_req_o    (lim_axi_mem_req),
+		.m_axi_resp_i   (lim_axi_mem_resp)
+    );
+
     // DRAM Memory simulation
     axi_mem_slave #(
         .AxiAddrWidth   (DATA_AXI_ADDR_WIDTH),
@@ -247,8 +296,8 @@ module sauria_tester(
 		.clk_i          (clk_sys),
 		.rst_ni         (rstn_sys),
 
-		.axi_req_i      (axi_mem_req),
-		.axi_resp_o     (axi_mem_resp)
+		.axi_req_i      (lim_axi_mem_req),
+		.axi_resp_o     (lim_axi_mem_resp)
     );
 
     integer         n_errs, n_errs_prev;
